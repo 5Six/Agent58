@@ -1,0 +1,10 @@
+certifi==2021.10.8
+cloudpickle==2.0.0
+gym==0.23.1
+gym-notices==0.0.6
+importlib-metadata==4.11.3
+numpy==1.22.3
+pip==21.2.4
+setuptools==58.0.4
+wheel==0.37.1
+zipp==3.7.0
