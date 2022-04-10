@@ -12,7 +12,7 @@ env.reset()
 capacity = 1000
 replay = deque([], capacity)
 
-while not done:
+while True:
     action = env.action_space.sample()
     observation, reward, done, info = env.step(action)
 
