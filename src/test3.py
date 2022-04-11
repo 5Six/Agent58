@@ -15,6 +15,7 @@ import torch.nn.functional as F
 import torchvision.transforms as T
 
 
+# env = gym.make('ALE/Boxing-ram-v5', render_mode='human').unwrapped
 env = gym.make('ALE/Boxing-ram-v5').unwrapped
 
 # set up matplotlib
@@ -26,6 +27,7 @@ plt.ion()
 
 # if gpu is to be used
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(device)
 
 Transition = namedtuple('Transition',
                         ('state', 'action', 'next_state', 'reward'))
@@ -56,8 +58,8 @@ class DQN(nn.Module):
 
     def forward(self, x):
         x = x.to(device)
-        print(x)
-        print(x.size())
+        # print(x)
+        # print(x.size())
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))
@@ -103,34 +105,27 @@ def select_action(state):
     steps_done += 1
     if sample > eps_threshold:
         with torch.no_grad():
-            # t.max(1) will return largest column value of each row.
-            # second column on max result is index of where max element was
-            # found, so we pick action with the larger expected reward.
+            # print(policy_net(state))
+            # print(policy_net(state).max(1))
+            # print()
 
-            print(policy_net(state))
-            print(policy_net(state).max(1))
-            print()
-
-            print(policy_net(state).max(1)[1].view(1, 1))
+            # print(policy_net(state).max(1)[1].view(1, 1))
             return policy_net(state).max(1)[1].view(1, 1)
     else:
         return torch.tensor([[random.randrange(n_actions)]], device=device, dtype=torch.long)
 
 
-episode_durations = []
-
-
-def plot_durations():
+def plot_scores():
     plt.figure(2)
     plt.clf()
-    durations_t = torch.tensor(episode_durations, dtype=torch.float)
+    scores_t = torch.tensor(scores, dtype=torch.float)
     plt.title('Training...')
     plt.xlabel('Episode')
-    plt.ylabel('Duration')
-    plt.plot(durations_t.numpy())
+    plt.ylabel('Scores')
+    plt.plot(scores_t.numpy())
     # Take 100 episode averages and plot them too
-    if len(durations_t) >= 100:
-        means = durations_t.unfold(0, 100, 1).mean(1).view(-1)
+    if len(scores_t) >= 100:
+        means = scores_t.unfold(0, 100, 1).mean(1).view(-1)
         means = torch.cat((torch.zeros(99), means))
         plt.plot(means.numpy())
 
@@ -185,12 +180,18 @@ def optimize_model():
     optimizer.step()
 
 num_episodes = 50
+scores = []
+
 for i_episode in range(num_episodes):
     # Initialize the environment and state
     state = env.reset()
     temp_state = state.astype(np.float32)
     state = torch.from_numpy(temp_state)
     state = state[None,:]
+
+    # init current_score
+    current_score = 0
+
     for t in count():
         # Select and perform an action
         action = select_action(state)
@@ -199,6 +200,9 @@ for i_episode in range(num_episodes):
         next_state = torch.from_numpy(temp_state)
         next_state = next_state[None, :]
         reward = torch.tensor([reward], device=device)
+
+        # accumulate reward into current_score
+        current_score+=reward
 
         if done:
             next_state = None
@@ -212,15 +216,16 @@ for i_episode in range(num_episodes):
         # Perform one step of the optimization (on the policy network)
         optimize_model()
         if done:
-            episode_durations.append(t + 1)
-            plot_durations()
+            scores.append(current_score)
+            plot_scores()
             break
     # Update the target network, copying all weights and biases in DQN
     if i_episode % TARGET_UPDATE == 0:
         target_net.load_state_dict(policy_net.state_dict())
 
+
 print('Complete')
-env.render()
+# env.render()
 env.close()
 plt.ioff()
 plt.show()
