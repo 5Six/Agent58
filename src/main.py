@@ -1,20 +1,26 @@
 import gym
 import ale_py
-import torch
-from collections import deque
+import Replay
+import DQN
 
 print('gym:', gym.__version__)
 print('ale_py:', ale_py.__version__)
 
-env = gym.make('Boxing-ram-v4', render_mode='human')
+env = gym.make('ALE/Boxing-ram-v5', render_mode='human')
 env.reset()
 
-capacity = 1000
-replay = deque([], capacity)
+done = 0
+
+flag = 0
 
 while not done:
-    action = env.action_space.sample()
-    observation, reward, done, info = env.step(action)
+    action = 1
+    state, reward, done, info = env.step(action)
+    # print(env.get_keys_to_action())
+    print(env.get_action_meanings())
+    if flag == 0:
+        print(info)
+        flag = 1
 
     if done:
         observation, info = env.reset(return_info=True)
