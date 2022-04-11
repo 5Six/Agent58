@@ -13,6 +13,8 @@ env.reset()
 flag = 0
 
 TOTAL_EPISODE_COUNT = 100
+BATCH_SIZE = 20
+C = 10
 
 epsilon, alpha, gamma = 0.1, 0.9, 0.1
 
@@ -24,6 +26,10 @@ for episode in range(TOTAL_EPISODE_COUNT):
     while not done:
         action = current_agent.choose_action()
         next_state, reward, done, info = env.step(action)
+        
+        if done:
+            next_state = "Terminal"
+
         current_agent.buffer.push(state, action, next_state, reward)
 
         # store (st,at, r, st+1) in D
@@ -31,6 +37,17 @@ for episode in range(TOTAL_EPISODE_COUNT):
 
         
         # sample random minibatch of (st,at, r, st+1) from D
+        minibatch = current_agent.buffer.sample(BATCH_SIZE)
+        for i in minibatch:
+            yj = 0
+            if i.next_state == "Terminal":
+                yj = i.reward
+            else:
+                yj = i.reward + current_agent.GAMMA * current_agent.get_best_arg() 
+                
+            # perform gradient descent 
+
+        # if time_step % C == 0: theta2 = theta1
         state = next_state
         time_step += 1 
 

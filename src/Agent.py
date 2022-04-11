@@ -3,7 +3,7 @@ import Replay
 
 class Agent:
 
-    def __init__(e,g,a,c=1000) -> None:
+    def __init__(self, e,g,a,c=1000) -> None:
         self.EPSILON = e
         self.GAMMA = g
         self.ALPHA = a
@@ -19,3 +19,6 @@ class Agent:
         #     #random
 
         return np.random.randint(0, 18)# change to action space
+
+    def get_best_arg(self) -> int:
+        return np.random.randint(0,18)
