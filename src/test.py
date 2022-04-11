@@ -56,7 +56,9 @@ class DQN(nn.Module):
         self.fc4 = nn.Linear(512, 18)
 
     def forward(self, x):
-        x = torch.Tensor([x]).to(device)
+        x = x.to(device)
+        print(x)
+        print(x.size())
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))
@@ -189,7 +191,7 @@ for i_episode in range(num_episodes):
 
         # Observe new state
         if not done:
-            next_state = torch.Tensor(next_state)
+            next_state = torch.from_numpy(next_state)
         else:
             next_state = None
 
