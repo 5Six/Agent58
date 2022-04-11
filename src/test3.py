@@ -51,10 +51,10 @@ class ReplayMemory(object):
 class DQN(nn.Module):
     def __init__(self):
         super(DQN, self).__init__()
-        self.fc1 = nn.Linear(128, 256)
-        self.fc2 = nn.Linear(256, 256)
-        self.fc3 = nn.Linear(256, 512)
-        self.fc4 = nn.Linear(512, 18)
+        self.fc1 = nn.Linear(128, 32)
+        self.fc2 = nn.Linear(32, 32)
+        self.fc3 = nn.Linear(32, 18)
+        # self.fc4 = nn.Linear(512, 18)
 
     def forward(self, x):
         x = x.to(device)
@@ -62,8 +62,8 @@ class DQN(nn.Module):
         # print(x.size())
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        x = F.relu(self.fc3(x))
-        x = self.fc4(x)
+        # x = F.relu(self.fc3(x))
+        x = self.fc3(x)
         return x
 
 resize = T.Compose([T.ToPILImage(),
@@ -107,8 +107,6 @@ def select_action(state):
         with torch.no_grad():
             # print(policy_net(state))
             # print(policy_net(state).max(1))
-            # print()
-
             # print(policy_net(state).max(1)[1].view(1, 1))
             return policy_net(state).max(1)[1].view(1, 1)
     else:
@@ -169,7 +167,8 @@ def optimize_model():
     expected_state_action_values = (next_state_values * GAMMA) + reward_batch
 
     # Compute Huber loss
-    criterion = nn.SmoothL1Loss()
+    # criterion = nn.SmoothL1Loss()
+    criterion = nn.HuberLoss()
     loss = criterion(state_action_values, expected_state_action_values.unsqueeze(1))
 
     # Optimize the model
@@ -223,6 +222,8 @@ for i_episode in range(num_episodes):
     if i_episode % TARGET_UPDATE == 0:
         target_net.load_state_dict(policy_net.state_dict())
 
+# Save model weights
+torch.save(target_net.state_dict(), 'dqn.pth')
 
 print('Complete')
 # env.render()
