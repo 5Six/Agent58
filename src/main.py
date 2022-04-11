@@ -1,7 +1,7 @@
 import gym
 import ale_py
 import Replay
-import DQN
+import Net
 
 print('gym:', gym.__version__)
 print('ale_py:', ale_py.__version__)
@@ -17,8 +17,9 @@ while not done:
     action = 1
     state, reward, done, info = env.step(action)
     # print(env.get_keys_to_action())
-    print(env.get_action_meanings())
+    # print(env.get_action_meanings())
     if flag == 0:
+        print(env.action_space.n)
         print(info)
         flag = 1
 

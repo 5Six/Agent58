@@ -17,3 +17,4 @@ class Net(nn.Module):
         x = F.relu(self.fc3(x))
         x = self.fc4(x)
         return x
+
