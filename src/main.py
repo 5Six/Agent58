@@ -1,71 +1,53 @@
+from typing import Final
 import gym
 import ale_py
 import Replay
 import Net
-import Agent
 
-print('gym:', gym.__version__)
-print('ale_py:', ale_py.__version__)
-
-env = gym.make('ALE/Boxing-ram-v5', render_mode='human')
-env.reset()
-
-flag = 0
-
-TOTAL_EPISODE_COUNT = 100
-BATCH_SIZE = 20
-C = 10
-
-epsilon, alpha, gamma = 0.1, 0.9, 0.1
-
-current_agent = Agent(epsilon, gamma, alpha)
-for episode in range(TOTAL_EPISODE_COUNT):
-    done = False
-    time_step = 1
-    state = env.reset()
-    while not done:
-        action = current_agent.choose_action()
-        next_state, reward, done, info = env.step(action)
-        
-        if done:
-            next_state = "Terminal"
-
-        current_agent.buffer.push(state, action, next_state, reward)
-
-        # store (st,at, r, st+1) in D
-        # memory.push(state, action, next_state, reward)
-
-        
-        # sample random minibatch of (st,at, r, st+1) from D
-        minibatch = current_agent.buffer.sample(BATCH_SIZE)
-        for i in minibatch:
-            yj = 0
-            if i.next_state == "Terminal":
-                yj = i.reward
-            else:
-                yj = i.reward + current_agent.GAMMA * current_agent.get_best_arg() 
-                
-            # perform gradient descent 
-
-        # if time_step % C == 0: theta2 = theta1
-        state = next_state
-        time_step += 1 
+from Agent import Agent
 
 
-while not done:
-    action = 1
-    state, reward, done, info = env.step(action)
-    # print(env.get_keys_to_action())
-    print(env.get_action_meanings())
-    if flag == 0:
-        print(info)
-        flag = 1
+def main() -> None:
 
-    if done:
-        observation, info = env.reset(return_info=True)
-   
+    ALPHA: Final = 0.9
+    GAMMA: Final = 0.1
+    EPSILON: Final = 0.1
+    TOTAL_EPISODE_COUNT: Final = 100
+    BATCH_SIZE: Final = 20
+    MEMORY_CAPACITY: Final = 1000
 
-env.close()
+    env = gym.make("ALE/Boxing-ram-v5")
+    agent = Agent(ALPHA, EPSILON, GAMMA, MEMORY_CAPACITY, BATCH_SIZE)
 
-# if __name__ == '__main__':
-#     main()
+    for _ in range(TOTAL_EPISODE_COUNT):
+        done = False
+        state = env.reset()
+
+        while not done:
+            action = agent.choose_action(env.action_space)
+            next_state, reward, done, _ = env.step(action)
+
+            if done:
+                next_state = "Terminal"
+
+            # store (st,at, r, st+1) in D
+            agent.store_transition((state, action, next_state, reward))
+
+            # sample random minibatch of (st,at, r, st+1) from D
+            minibatch = agent.sample_experience()
+
+            for i in minibatch:
+                yj = 0
+                if i.next_state == "Terminal":
+                    yj = i.reward
+                else:
+                    yj = i.reward + agent.gamma * agent.get_best_arg()
+
+                # perform gradient descent
+
+            # if time_step % C == 0: theta2 = theta1
+            state = next_state
+
+
+if __name__ == "__main__":
+    main()
