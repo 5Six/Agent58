@@ -1,19 +1,16 @@
-import torch
-import torch.nn as nn
+from torch import nn
 import torch.nn.functional as F
 
 
 class Net(nn.Module):
-    def __init__(self):
+    def __init__(self, dimension: int, output: int) -> None:
         super(Net, self).__init__()
-        self.fc1 = nn.Linear(128, 256)
+        self.fc1 = nn.Linear(dimension, 256)
         self.fc2 = nn.Linear(256, 256)
-        self.fc3 = nn.Linear(256, 512)
-        self.fc4 = nn.Linear(512, 18)
+        self.fc3 = nn.Linear(256, output)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        x = F.relu(self.fc3(x))
-        x = self.fc4(x)
+        x = self.fc3(x)
         return x
