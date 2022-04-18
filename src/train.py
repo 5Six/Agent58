@@ -43,8 +43,8 @@ gamma = 1
 l2_regularization = 0  # L2 regularization coefficient
 plot_freq = 10
 
-net_save_path = 'net_boxing-v{}_{}DQN.pth'.format(env_version, method)
-plot_save_path = 'boxing-v{}_{}DQN.png'.format(env_version, method)
+net_save_path = 'net/net_boxing-v{}_{}DQN.pth'.format(env_version, method)
+plot_save_path = 'plot/boxing-v{}_{}DQN.png'.format(env_version, method)
 device = "cuda"
 if env_version == 1:
     T_max = 499  # latest step that environment allows, starting from 0
