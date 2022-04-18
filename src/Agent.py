@@ -21,6 +21,19 @@ class Agent:
         memory_capacity: int = 1000,
         batch_size: int = 32,
     ) -> None:
+        """
+        __init__ _summary_
+
+        Args:
+            learning_rate (float): _description_
+            state_space (int): _description_
+            action_space (int): _description_
+            gradient_algo (str): _description_
+            device (_type_): _description_
+            seed (int, optional): _description_. Defaults to 10.
+            memory_capacity (int, optional): _description_. Defaults to 1000.
+            batch_size (int, optional): _description_. Defaults to 32.
+        """
 
         self.learning_rate = learning_rate
         self.seed = seed
@@ -40,93 +53,104 @@ class Agent:
         self.optimiser = self.get_optimisation()
 
     def choose_action(self, epsilon, state):
+        """
+        choose_action _summary_
 
-        # add epsilon decay here
-        # make device parameters a valiable
+        Args:
+            epsilon (_type_): _description_
+            state (_type_): _description_
 
+        Returns:
+            _type_: _description_
+        """
         if np.random.random() < epsilon:
             action = torch.tensor(
-                [[np.random.choice(self.action_space)]],
+                [[np.random.randint(self.action_space)]],
                 device=self.device,
                 dtype=torch.long,
             )
         else:
             with torch.no_grad():
 
-                # ERRORING - state input on cpu but nn on cuda
-                # action = self.action_value_network(state).max(1)[1].view(1, 1)
-
-                action = torch.tensor(
-                    [[np.random.choice(self.action_space)]],
-                    device=self.device,
-                    dtype=torch.long,
-                )
+                # ERRORING - state input on cpu but nnexit() on cuda
+                action = self.action_value_network(state).max(1)[1].view(1, 1)
 
         return action
 
     def store_transition(self, transition: tuple) -> None:
+        """
+        store_transition _summary_
+
+        Args:
+            transition (tuple): _description_
+        """
         self.buffer.push(transition[0], transition[1], transition[2], transition[3], transition[4])
 
     def sample_experience(self):
+        """
+        sample_experience _summary_
+
+        Returns:
+            _type_: _description_
+        """
         if len(self.buffer) < self.batch_size:
             return None
         return self.buffer.sample(self.batch_size)
 
     def learn(self, gamma, experience) -> tuple:
+        """
+        learn _summary_
 
-        # CHECK
+        Args:
+            gamma (_type_): _description_
+            experience (_type_): _description_
+
+        Returns:
+            tuple: _description_
+        """
+
         batch = self.buffer_tuple(*zip(*experience))
-
-        # needed??
-        # non_final_mask = torch.tensor(
-        #     tuple(map(lambda s: s is not True, batch.terminal)),
-        #     device=self.device,
-        #     dtype=torch.bool,
-        # )
 
         states = torch.cat(batch.state)
         actions = torch.cat(batch.action)
-        # non_final_next_states = torch.cat([s for s in batch.next_state if s is not None])
         next_states = torch.cat(batch.next_state)
         rewards = torch.cat(batch.reward)
         terminals = torch.cat(batch.terminal)
 
-        # non terminal next states
-        # non_final_next_states = torch.masked_select(next_states, terminals)
-        non_terminal_next_states = torch.cat([s for s in batch.next_state if s is not None])
+        with torch.no_grad():
+            target_q_values = self.target_value_network(next_states)
+        self.optimiser.zero_grad()
 
-        # current Q values are estimated by the network for all actions
-        current_q_value = self.action_value_network(states).gather(1, actions)
+        current_q_values = self.action_value_network(states)
 
-        # expected Q values are estimated from actions which gives maximun Q value
-        max_next_q_value = torch.zeros(self.batch_size, device=self.device)
+        max_next_q_values = target_q_values.max(dim=1, keepdim=True)[0]
+        # test_Q_next_max = torch.max(target_q_values, 1)[0]
 
-        max_next_q_value[terminals] = (
-            self.action_value_network(non_final_next_states).max(1)[0].detach()
-        )
-        expected_q_value = rewards + (gamma * max_next_q_value)
+        # terminal states should have V(s) = max(Q(s,a)) = 0
+        max_next_q_values[terminals] = 0
 
-        return current_q_value, expected_q_value
+        expected_q_values = rewards + gamma * max_next_q_values
+
+        relavent_q_values = torch.gather(current_q_values, 1, actions.view(-1, 1)).squeeze()
+
+        return current_q_values, expected_q_values, relavent_q_values
 
     def get_loss(self, current, expected, function) -> Union[nn.HuberLoss, nn.MSELoss]:
 
         # CHECK
         if function.lower() == "huberloss":
-            loss = nn.HuberLoss(current, expected.unsqueeze(1))
+            loss_function = nn.HuberLoss()
         else:
-            loss = nn.MSELoss(current, expected.unsqueeze(1))
+            loss_function = nn.MSELoss()
 
-        return loss
+        return loss_function(current, expected.unsqueeze(1))
 
-    def gradient_decent(self, loss):
-
-        self.optimiser.zero_grad()
+    def gradient_decent(self, loss: Union[nn.HuberLoss, nn.MSELoss]) -> None:
         loss.backward()
         self.optimiser.step()
-        pass
 
-    def update_target_network(self):
-        pass
+    def update_target_network(self) -> None:
+        self.target_value_network.load_state_dict(self.action_value_network.state_dict())
 
     def get_optimisation(self):
 

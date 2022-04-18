@@ -1,5 +1,6 @@
 from typing import Final
 import torch
+import numpy as np
 import gym
 
 from Agent import Agent
@@ -10,10 +11,10 @@ def main() -> None:
 
     ALPHA: Final = 0.001
     GAMMA: Final = 0.9
-    EPSILON: Final = 0.9
-    # EPSILON_FINAL: Final = 0.05
-    # EPSILON_DECAY: Final = 200
-    TOTAL_EPISODE_COUNT: Final = 100
+    EPSILON: Final = 1.0
+    EPSILON_FINAL: Final = 0.05
+    EPSILON_DECAY: Final = 1000
+    TOTAL_EPISODE_COUNT: Final = 10
     BATCH_SIZE: Final = 5
     MEMORY_CAPACITY: Final = 1000
     LOSS_FUNCTION: Final = "HuberLoss"
@@ -38,20 +39,23 @@ def main() -> None:
         BATCH_SIZE,
     )
 
+    rewards = 0
+
     for i in range(TOTAL_EPISODE_COUNT):
         done = False
         state = env.reset()
         state = nparray_to_tensor(state, DEVICE)
 
         while not done:
-            action = agent.choose_action(EPSILON, state)
+
+            # epsilon decay
+            epsilon = np.interp(i, [0, EPSILON_DECAY], [EPSILON, EPSILON_FINAL])
+
+            action = agent.choose_action(epsilon, state)
             next_state, reward, done, _ = env.step(action.item())
             next_state = nparray_to_tensor(next_state, DEVICE)
             reward = torch.tensor([reward], device=DEVICE)
             terminal = torch.tensor([done], device=DEVICE)
-
-            if done:
-                next_state = None
 
             # store (s, a, r, s+1, bool) in D
             agent.store_transition((state, action, next_state, reward, terminal))
@@ -64,10 +68,10 @@ def main() -> None:
                 continue
 
             # learn from NN
-            current_q, expected_q = agent.learn(GAMMA, minibatch)
+            current_q, expected_q, relavent_q = agent.learn(GAMMA, minibatch)
 
             # calculate loss
-            loss = agent.get_loss(current_q, expected_q, LOSS_FUNCTION)
+            loss = agent.get_loss(current_q, relavent_q, LOSS_FUNCTION)
 
             # perform gradient descent
             agent.gradient_decent(loss)
