@@ -3,11 +3,12 @@ import torch, gym
 import numpy as np
 
 # render = True
+custom_name = '10k_eps'
 N_ep = 1
 env_version = 5
 # method = 'double'
 method = 'vanilla'
-net_load_path = 'net/net_boxing-v{}_{}DQN.pth'.format(env_version, method)
+net_load_path = f'net/net_boxing-v{env_version}_{method}DQN_{custom_name}.pth'
 net = Q_net()
 net.load_state_dict(torch.load(net_load_path))
 net.eval()

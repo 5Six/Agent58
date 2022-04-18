@@ -28,7 +28,7 @@ class ReplayBuffer:
 
 
 # hyperparameters
-N_episodes = 3000  # for how many episodes to train
+N_episodes = 10000  # 3000
 env_version = 5  # cartpole version 0 or 1
 # method = 'double'  # method for evaluating the targets; double stands for DDQN
 method = 'vanilla'
@@ -43,9 +43,11 @@ gamma = 1
 l2_regularization = 0  # L2 regularization coefficient
 plot_freq = 10
 
-net_save_path = 'net/net_boxing-v{}_{}DQN.pth'.format(env_version, method)
-plot_save_path = 'plot/boxing-v{}_{}DQN.png'.format(env_version, method)
+custom_name = '10k_eps'
+net_save_path = f'net/net_boxing-v{env_version}_{method}DQN_{custom_name}.pth'
+plot_save_path = f'plot/plot_boxing-v{env_version}_{method}DQN_{custom_name}.png'
 device = "cuda"
+
 if env_version == 1:
     T_max = 499  # latest step that environment allows, starting from 0
     Pass_score = 499  # usually 475
@@ -54,7 +56,7 @@ elif env_version == 0:
     Pass_score = 500  # was 199
 elif env_version == 5:
     T_max = 199 # was 199
-    Pass_score = 500  # was 199 
+    Pass_score = 5000  # was 199, set to ridiculously high number for all episodes to run
 else:
     assert False, "wrong env_version, should be 0 or 1 (integer)"
 
