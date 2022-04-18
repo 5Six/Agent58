@@ -79,7 +79,7 @@ replay_buffer = ReplayBuffer(Size_replay_buffer, keys=['x', 'a', 'r', 'x_next', 
 
 env = gym.make('ALE/Boxing-ram-v'+str(env_version))
 # env = gym.make('CartPole-v'+str(env_version))
-eps = eps_start
+eps = eps_start # eps stands for epsilon, TO DO: change to 'epsilon'
 
 backprops_total = 0  # to track when to update the target net
 
@@ -93,7 +93,7 @@ s_cur = env.reset()
 s_prev = s_cur
 score = 0  # score per episode
 t0 = time.time()
-for ep in range(N_episodes):
+for ep in range(N_episodes): # ep stands for episode
     for step in range(T_max+2):
         # choose an action:
         x = torch.from_numpy(np.concatenate((s_cur, s_cur-s_prev))).float()
@@ -198,7 +198,7 @@ for ep in range(N_episodes):
                 exit(0)
             # print("net saved to '{}'".format(net_save_path))
 
-        if done and ep_played % plot_freq == 0:
+        if done and ep_played % plot_freq == 0: # done flag not done correctly?
             plt.close('all')
             plt.plot(avg_score_history)
             plt.xlabel('episodes')
