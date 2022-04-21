@@ -46,7 +46,6 @@ def main() -> None:
         batch_size=BATCH_SIZE,
     )
 
-    rewards = 0
 
     for i in range(TOTAL_EPISODE_COUNT):
         done = False
@@ -54,7 +53,6 @@ def main() -> None:
         state = nparray_to_tensor(state, DEVICE)
 
         while not done:
-
             # epsilon decay
             epsilon = np.interp(i, [0, EPSILON_DECAY], [EPSILON, EPSILON_FINAL])
 
@@ -63,7 +61,7 @@ def main() -> None:
             next_state = nparray_to_tensor(next_state, DEVICE)
             reward = torch.tensor([reward], device=DEVICE)
             terminal = torch.tensor([done], device=DEVICE)
-
+            rewards[i] += reward
             # store (s, a, r, s+1, bool) in D
             agent.store_transition((state, action, next_state, reward, terminal))
 
@@ -89,10 +87,10 @@ def main() -> None:
 
             # move to the next state
             state = next_state
-
-            if terminal:
+            if done:
                 break
 
 
 if __name__ == "__main__":
     main()
+

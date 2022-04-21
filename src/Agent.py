@@ -123,7 +123,6 @@ class Agent:
         self.optimiser.zero_grad()
 
         current_q_values = self.action_value_network(states)
-
         max_next_q_values = target_q_values.max(dim=1, keepdim=True)[0]
         # test_Q_next_max = torch.max(target_q_values, 1)[0]
 
@@ -133,11 +132,9 @@ class Agent:
         expected_q_values = rewards + gamma * max_next_q_values
 
         relavent_q_values = torch.gather(current_q_values, 1, actions.view(-1, 1)).squeeze()
-
-        return current_q_values, expected_q_values, relavent_q_values
+        return max_next_q_values.squeeze(0), expected_q_values, relavent_q_values
 
     def get_loss(self, current, expected, function) -> Union[nn.HuberLoss, nn.MSELoss]:
-
         if function.lower() == "huberloss":
             loss_function = nn.HuberLoss()
         else:
