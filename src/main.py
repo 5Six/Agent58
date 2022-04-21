@@ -10,23 +10,17 @@ from Utils import load_data
 
 
 def main() -> None:
+    # load in config file
+    with open("../config.json", "r") as f:
+        config = json.load(f)
 
-    ALPHA: Final = 0.001
-    GAMMA: Final = 0.9
-    EPSILON: Final = 1.0
-    EPSILON_FINAL: Final = 0.05
-    EPSILON_DECAY: Final = 1000
-    TOTAL_EPISODE_COUNT: Final = 10
-    BATCH_SIZE: Final = 5
-    MEMORY_CAPACITY: Final = 1000
-    LOSS_FUNCTION: Final = "HuberLoss"
-    GRADIENT_ALGORITHM: Final = "RMSprop"
-    TARGET_UPDATE: Final = 10
-    SEED: Final = 10
-
-    # # load in config file
-    # with json.open("TO DO"):
-    #     pass
+    GAMMA: Final = config['gamma']
+    EPSILON: Final = config['epsilon_start']
+    EPSILON_FINAL: Final = config['epsilon_final']
+    EPSILON_DECAY: Final = config['epsilon_decay']
+    TOTAL_EPISODE_COUNT: Final = config['total_episode_count']
+    LOSS_FUNCTION: Final = config['loss_function']
+    TARGET_UPDATE: Final = config['target_update']
 
     DEVICE: Final = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -36,14 +30,10 @@ def main() -> None:
     ACTION_SPACE: Final = env.action_space.n
 
     agent = Agent(
-        learning_rate=ALPHA,
+        config=config,
         state_space=STATE_SPACE,
         action_space=ACTION_SPACE,
-        gradient_algo=GRADIENT_ALGORITHM,
         device=DEVICE,
-        seed=SEED,
-        memory_capacity=MEMORY_CAPACITY,
-        batch_size=BATCH_SIZE,
     )
 
     rewards = 0

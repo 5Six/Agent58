@@ -12,14 +12,10 @@ from Net import Net
 class Agent:
     def __init__(
         self,
-        learning_rate: float,
+        config: dict,
         state_space: int,
         action_space: int,
-        gradient_algo: str,
-        device,
-        seed: int = 10,
-        memory_capacity: int = 1000,
-        batch_size: int = 32,
+        device: str,
     ) -> None:
         """
         __init__ _summary_
@@ -35,14 +31,14 @@ class Agent:
             batch_size (int, optional): _description_. Defaults to 32.
         """
 
-        self.learning_rate = learning_rate
-        self.seed = seed
+        self.learning_rate = config['alpha']
+        self.seed = config['seed']
         torch.manual_seed(self.seed)
-        self.memory_capacity = memory_capacity
-        self.batch_size = batch_size
+        self.memory_capacity = config['memory_capacity']
+        self.batch_size = config['batch_size']
         self.action_space = action_space
         self.state_space = state_space
-        self.gradient_algo = gradient_algo
+        self.gradient_algo = config['gradient_algorithm']
         self.device = device
         self.buffer_tuple = namedtuple(
             "Transition", ("state", "action", "next_state", "reward", "terminal")
