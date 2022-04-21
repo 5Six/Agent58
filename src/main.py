@@ -1,3 +1,4 @@
+import json
 from typing import Final
 import torch
 import numpy as np
@@ -5,6 +6,7 @@ import gym
 
 from Agent import Agent
 from Utils import nparray_to_tensor
+from Utils import load_data
 
 
 def main() -> None:
@@ -21,6 +23,11 @@ def main() -> None:
     GRADIENT_ALGORITHM: Final = "RMSprop"
     TARGET_UPDATE: Final = 10
     SEED: Final = 10
+
+    # # load in config file
+    # with json.open("TO DO"):
+    #     pass
+
     DEVICE: Final = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     env = gym.make("ALE/Boxing-ram-v5")
@@ -29,14 +36,14 @@ def main() -> None:
     ACTION_SPACE: Final = env.action_space.n
 
     agent = Agent(
-        ALPHA,
-        STATE_SPACE,
-        ACTION_SPACE,
-        GRADIENT_ALGORITHM,
-        DEVICE,
-        SEED,
-        MEMORY_CAPACITY,
-        BATCH_SIZE,
+        learning_rate=ALPHA,
+        state_space=STATE_SPACE,
+        action_space=ACTION_SPACE,
+        gradient_algo=GRADIENT_ALGORITHM,
+        device=DEVICE,
+        seed=SEED,
+        memory_capacity=MEMORY_CAPACITY,
+        batch_size=BATCH_SIZE,
     )
 
     rewards = 0
@@ -61,7 +68,7 @@ def main() -> None:
             agent.store_transition((state, action, next_state, reward, terminal))
 
             # sample random minibatch of (st,at, r, st+1) from D
-            minibatch = agent.sample_experience()
+            minibatch = agent.sample_experience
 
             if minibatch is None:
                 state = next_state

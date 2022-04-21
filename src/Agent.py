@@ -86,6 +86,7 @@ class Agent:
         """
         self.buffer.push(transition[0], transition[1], transition[2], transition[3], transition[4])
 
+    @property
     def sample_experience(self):
         """
         sample_experience _summary_
@@ -137,7 +138,6 @@ class Agent:
 
     def get_loss(self, current, expected, function) -> Union[nn.HuberLoss, nn.MSELoss]:
 
-        # CHECK
         if function.lower() == "huberloss":
             loss_function = nn.HuberLoss()
         else:
