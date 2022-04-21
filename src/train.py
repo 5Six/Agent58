@@ -3,15 +3,18 @@ import numpy as np, time
 import matplotlib.pyplot as plt
 from collections import deque
 
-from net import Q_net
+from net import Q_net, Dueling_DQN
 from replay import ReplayBuffer
 
 
 # hyperparameters
-N_episodes = 10000  # 3000
+N_episodes = 3000  # 10000
 env_version = 5  # cartpole version 0 or 1
+
 # method = 'double'  # method for evaluating the targets; double stands for DDQN
-method = 'vanilla'
+# method = 'vanilla'
+method = 'dueling'
+
 learning_rate = 1e-4
 Size_replay_buffer = 50000  # in time steps
 epsilon_start = 1  # epsilon for epsilon greedy algorithm
@@ -23,7 +26,7 @@ gamma = 1
 l2_regularization = 0  # L2 regularization coefficient
 plot_freq = 10
 
-custom_name = 'test'
+custom_name = 'dueling'
 net_save_path = f'net/net_boxing-v{env_version}_{method}DQN_{custom_name}.pth'
 plot_save_path = f'plot/plot_boxing-v{env_version}_{method}DQN_{custom_name}.png'
 device = "cuda"
@@ -37,13 +40,20 @@ elif env_version == 5:
 else:
     assert False, "wrong env_version, should be 0 or 1 or 5(integer)"
 
-
-net = Q_net()  # net that determines policy to follow (except when randomly choosing actions during training)
-net.to(device)
-target_net = Q_net()  # net that computes the targets
-target_net.to(device)
-target_net.load_state_dict(net.state_dict())  # copying all network parameters
-target_net.eval()
+if method == 'dueling':
+    net = Dueling_DQN()  # net that determines policy to follow (except when randomly choosing actions during training)
+    net.to(device)
+    target_net = Dueling_DQN()  # net that computes the targets
+    target_net.to(device)
+    target_net.load_state_dict(net.state_dict())  # copying all network parameters
+    target_net.eval()
+else: # vanilla or double
+    net = Q_net()  # net that determines policy to follow (except when randomly choosing actions during training)
+    net.to(device)
+    target_net = Q_net()  # net that computes the targets
+    target_net.to(device)
+    target_net.load_state_dict(net.state_dict())  # copying all network parameters
+    target_net.eval()
 
 # loss_function = torch.nn.MSELoss()
 loss_function = torch.nn.SmoothL1Loss()  # Huber loss
@@ -124,7 +134,8 @@ for ep in range(N_episodes): # ep stands for episode
             Q = net(xs)
             Q_next_max, Q_next_argmax = torch.max(Q_next, 1)
             V_next = torch.gather(Q_next_, 1, Q_next_argmax.view(-1, 1)).squeeze()
-        else:
+
+        else: # vanilla
             # finding targets by vanilla method
             with torch.no_grad():
                 # print(next_xs)

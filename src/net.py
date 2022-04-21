@@ -21,3 +21,31 @@ class Q_net(nn.Module):
         # q = self.bn3(q)
         return q
 
+
+class Dueling_DQN(nn.Module):
+    def __init__(self):
+        super(Dueling_DQN, self).__init__()
+        h = 256
+        self.fc1_adv = nn.Linear(256, h)
+        self.fc1_val = nn.Linear(256, h)
+
+        self.fc2_adv = nn.Linear(h, h)
+        self.fc2_val = nn.Linear(h, h)
+
+        self.fc3_adv = nn.Linear(256, 18)
+        self.fc3_val = nn.Linear(256, 1)
+
+        # self.relu = nn.ReLU()
+
+    def forward(self, x):
+        adv = F.relu(self.fc1_adv(x))
+        val = F.relu(self.fc1_val(x))
+
+        adv = F.relu(self.fc2_adv(x))
+        val = F.relu(self.fc2_val(x))
+
+        adv = self.fc3_adv(adv)
+        val = self.fc3_val(val).expand(x.size(0), 18)
+        
+        x = val + adv - adv.mean(1).unsqueeze(1).expand(x.size(0), 18)
+        return x
