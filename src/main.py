@@ -37,15 +37,16 @@ def main() -> None:
     )
 
     state_current = env.reset()
+    state_current = nparray_to_tensor(state_current, DEVICE)
     state_previous = state_current
-
 
     for i in range(TOTAL_EPISODE_COUNT):
         done = False
         #state = nparray_to_tensor(state, DEVICE)
 
         while not done:
-            state_with_diff = torch.from_numpy(np.concatenate((state_current, state_current - state_previous))).to(DEVICE)
+            state_with_diff = torch.cat((state_current[0], state_current[0] - state_previous[0]))
+           
             # epsilon decay
             epsilon = np.interp(i, [0, EPSILON_DECAY], [EPSILON, EPSILON_FINAL])
 
@@ -55,7 +56,10 @@ def main() -> None:
             reward = torch.tensor([reward], device=DEVICE)
             terminal = torch.tensor([done], device=DEVICE)
             
-            next_state_with_diff = torch.cat((next_state[0], next_state[0] - state_with_diff[0])).to(DEVICE)
+            next_state_with_diff = torch.cat((next_state[0], next_state[0] - state_with_diff[0]))
+            
+            state_with_diff = state_with_diff[None, :]
+            next_state_with_diff = next_state_with_diff[None, :]
 
             # store (s, a, r, s+1, bool) in D
             agent.store_transition((state_with_diff, action, next_state_with_diff, reward, terminal))
