@@ -11,7 +11,7 @@ from Utils import load_data
 
 def main() -> None:
     # load in config file
-    with open("../config.json", "r") as f:
+    with open("./config.json", "r") as f:
         config = json.load(f)
 
     GAMMA: Final = config['gamma']
@@ -36,30 +36,36 @@ def main() -> None:
         device=DEVICE,
     )
 
+    state_current = env.reset()
+    state_previous = state_current
+
 
     for i in range(TOTAL_EPISODE_COUNT):
         done = False
-        state = env.reset()
-        state = nparray_to_tensor(state, DEVICE)
+        #state = nparray_to_tensor(state, DEVICE)
 
         while not done:
+            state_with_diff = torch.from_numpy(np.concatenate((state_current, state_current - state_previous))).to(DEVICE)
             # epsilon decay
             epsilon = np.interp(i, [0, EPSILON_DECAY], [EPSILON, EPSILON_FINAL])
 
-            action = agent.choose_action(epsilon, state)
+            action = agent.choose_action(epsilon, state_with_diff)
             next_state, reward, done, _ = env.step(action.item())
             next_state = nparray_to_tensor(next_state, DEVICE)
             reward = torch.tensor([reward], device=DEVICE)
             terminal = torch.tensor([done], device=DEVICE)
-            rewards[i] += reward
+            
+            next_state_with_diff = torch.cat((next_state[0], next_state[0] - state_with_diff[0])).to(DEVICE)
+
             # store (s, a, r, s+1, bool) in D
-            agent.store_transition((state, action, next_state, reward, terminal))
+            agent.store_transition((state_with_diff, action, next_state_with_diff, reward, terminal))
 
             # sample random minibatch of (st,at, r, st+1) from D
             minibatch = agent.sample_experience
 
             if minibatch is None:
-                state = next_state
+                state_previous = state_current
+                state_current = next_state
                 continue
 
             # learn from NN
@@ -76,8 +82,13 @@ def main() -> None:
                 agent.update_target_network()
 
             # move to the next state
-            state = next_state
+            state_previous = state_current
+            state_current = next_state
+            
+            
             if done:
+                state_current = env.reset()
+                state_previous = state_current
                 break
 
 

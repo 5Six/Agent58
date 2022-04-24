@@ -109,6 +109,7 @@ class Agent:
         batch = self.buffer_tuple(*zip(*experience))
 
         states = torch.cat(batch.state)
+        test = states.shape
         actions = torch.cat(batch.action)
         next_states = torch.cat(batch.next_state)
         rewards = torch.cat(batch.reward)

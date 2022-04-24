@@ -4,7 +4,7 @@
     "epsilon_start": 1.0,
     "epsilon_final": 0.05,
     "epsilon_decay": 1000,
-    "total_epsiode_count": 10,
+    "total_episode_count": 10,
     "batch_size": 5,
     "memory_capacity": 1000,
     "loss_function": "huberloss",

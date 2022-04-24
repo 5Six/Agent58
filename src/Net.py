@@ -5,7 +5,7 @@ import torch.nn.functional as F
 class Net(nn.Module):
     def __init__(self, dimension: int, output: int) -> None:
         super(Net, self).__init__()
-        self.fc1 = nn.Linear(dimension, 256)
+        self.fc1 = nn.Linear(dimension * 2, 256)
         self.fc2 = nn.Linear(256, 256)
         self.fc3 = nn.Linear(256, output)
 
