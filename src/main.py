@@ -36,19 +36,15 @@ def main() -> None:
         device=DEVICE,
     )
 
- 
-
-  
     for i in range(TOTAL_EPISODE_COUNT):
         done = False
         state_current = env.reset()
         state_current = nparray_to_tensor(state_current, DEVICE)
         state_previous = state_current
         #state = nparray_to_tensor(state, DEVICE)
-
-        while not done:
-
-            
+        timestep = 0
+        while not done:            
+            timestep += 1
             state_with_diff = torch.cat((state_current[0], state_current[0] - state_previous[0]))
           
             # epsilon decay
@@ -59,20 +55,23 @@ def main() -> None:
             reward = torch.tensor([reward], device=DEVICE)
             terminal = torch.tensor([done], device=DEVICE)
             
-            next_state_with_diff = torch.cat((next_state[0], next_state[0] - state_with_diff[0]))
+            next_state_with_diff = torch.cat((next_state[0], next_state[0] - state_current[0]))
             
             state_with_diff = state_with_diff[None, :]
             next_state_with_diff = next_state_with_diff[None, :]
 
+            
+            #print(next_state_with_diff)
             # store (s, a, r, s+1, bool) in D
             agent.store_transition((state_with_diff, action, next_state_with_diff, reward, terminal))
 
             # sample random minibatch of (st,at, r, st+1) from D
             minibatch = agent.sample_experience
 
-            if minibatch is None:
-                state_previous = state_current
-                state_current = next_state
+            state_previous = state_current
+            state_current = next_state
+
+            if minibatch is None:              
                 continue
 
             # learn from NN
@@ -80,22 +79,18 @@ def main() -> None:
 
             # calculate loss
             loss = agent.get_loss(current_q, relavent_q, LOSS_FUNCTION)
+            print(i, ": ", loss)
 
             # perform gradient descent
             agent.gradient_decent(loss)
-
-            # if time_step % C == 0: theta2 = theta1
-            if i % TARGET_UPDATE:
+            
+            
+            #if time_step % C == 0: theta2 = theta1
+            if timestep % TARGET_UPDATE == 0:
                 agent.update_target_network()
 
             # move to the next state
-            state_previous = state_current
-            state_current = next_state
-            
-            
             if done:
-                state_current = env.reset()
-                state_previous = state_current
                 break
 
 

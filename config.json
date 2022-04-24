@@ -1,14 +1,14 @@
 {
-    "alpha": 0.001,
+    "alpha": 1e-4,
     "gamma": 0.9,
     "epsilon_start": 1.0,
     "epsilon_final": 0.02,
     "epsilon_decay": 1000,
-    "total_episode_count": 10,
-    "batch_size": 5,
-    "memory_capacity": 1000,
+    "total_episode_count": 3000,
+    "batch_size": 32,
+    "memory_capacity": 50000,
     "loss_function": "huberloss",
     "gradient_algorithm": "RMSprop",
-    "target_update": 10,
+    "target_update": 500,
     "seed": 10
 }

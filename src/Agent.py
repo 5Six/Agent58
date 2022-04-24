@@ -120,24 +120,25 @@ class Agent:
         self.optimiser.zero_grad()
 
         current_q_values = self.action_value_network(states)
-        max_next_q_values = target_q_values.max(dim=1, keepdim=True)[0]
-        # test_Q_next_max = torch.max(target_q_values, 1)[0]
-
+        max_next_q_values = torch.max(target_q_values, 1)[0]
+               
         # terminal states should have V(s) = max(Q(s,a)) = 0
         max_next_q_values[terminals] = 0
 
-        expected_q_values = rewards + gamma * max_next_q_values
+        expected_q_values = (rewards + (gamma * max_next_q_values).squeeze())
 
         relavent_q_values = torch.gather(current_q_values, 1, actions.view(-1, 1)).squeeze()
-        return max_next_q_values.squeeze(0), expected_q_values, relavent_q_values
+
+        return relavent_q_values, expected_q_values, expected_q_values
 
     def get_loss(self, current, expected, function) -> Union[nn.HuberLoss, nn.MSELoss]:
+        #print(current,"                ", expected)
         if function.lower() == "huberloss":
-            loss_function = nn.HuberLoss()
+            loss_function = nn.SmoothL1Loss()
         else:
             loss_function = nn.MSELoss()
 
-        return loss_function(current, expected.unsqueeze(1))
+        return loss_function(current, expected)
 
     def gradient_decent(self, loss: Union[nn.HuberLoss, nn.MSELoss]) -> None:
         loss.backward()
