@@ -36,20 +36,23 @@ def main() -> None:
         device=DEVICE,
     )
 
-    state_current = env.reset()
-    state_current = nparray_to_tensor(state_current, DEVICE)
-    state_previous = state_current
+ 
 
+  
     for i in range(TOTAL_EPISODE_COUNT):
         done = False
+        state_current = env.reset()
+        state_current = nparray_to_tensor(state_current, DEVICE)
+        state_previous = state_current
         #state = nparray_to_tensor(state, DEVICE)
 
         while not done:
+
+            
             state_with_diff = torch.cat((state_current[0], state_current[0] - state_previous[0]))
-           
+          
             # epsilon decay
             epsilon = np.interp(i, [0, EPSILON_DECAY], [EPSILON, EPSILON_FINAL])
-
             action = agent.choose_action(epsilon, state_with_diff)
             next_state, reward, done, _ = env.step(action.item())
             next_state = nparray_to_tensor(next_state, DEVICE)
