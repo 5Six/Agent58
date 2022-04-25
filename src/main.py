@@ -2,6 +2,9 @@ import json
 import torch
 import numpy as np, time
 import gym
+import os
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
+
 from collections import deque
 
 from Agent import Agent

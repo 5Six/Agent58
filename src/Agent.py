@@ -156,7 +156,7 @@ class Agent:
         else:
             loss_function = nn.MSELoss()
 
-        return loss_function(current, expected)
+        return loss_function(current, expected).to(self.device)
 
     def gradient_decent(self, loss: Union[nn.HuberLoss, nn.MSELoss]) -> None:
         loss.backward()

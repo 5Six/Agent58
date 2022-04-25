@@ -1,6 +1,6 @@
 from torch import nn
 import torch.nn.functional as F
-
+import torch
 
 class Net(nn.Module):
     def __init__(self, dimension: int, output: int) -> None:
@@ -8,6 +8,9 @@ class Net(nn.Module):
         self.fc1 = nn.Linear(dimension * 2, 256)
         self.fc2 = nn.Linear(256, 256)
         self.fc3 = nn.Linear(256, output)
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.to(self.device)
+        
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
