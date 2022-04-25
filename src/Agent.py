@@ -68,7 +68,7 @@ class Agent:
         else:
             with torch.no_grad():
                 #ERRORING - state input on cpu but nnexit() on cuda
-                print(self.action_value_network(state))
+                # print(self.action_value_network(state))
                 action = torch.argmax(self.action_value_network(state)).view(1,1)
 
         return action

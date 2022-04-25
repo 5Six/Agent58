@@ -3,15 +3,17 @@ from typing import Final
 import torch
 import numpy as np
 import gym
+from collections import deque
 
 from Agent import Agent
 from Utils import nparray_to_tensor
 from Utils import load_data
+from Utils import Plot
 
 
 def main() -> None:
     # load in config file
-    with open("./config.json", "r") as f:
+    with open("config.json", "r") as f:
         config = json.load(f)
 
     GAMMA: Final = config['gamma']
@@ -36,14 +38,21 @@ def main() -> None:
         device=DEVICE,
     )
 
+    plot = Plot()
+    latest_scores = deque(maxlen=100) # store the latest 100 scores
+    average_latest_scores = []
+    score = average_best_score = 0
+
     for i in range(TOTAL_EPISODE_COUNT):
+        print(f"Episode: {i+1}")
         done = False
         state_current = env.reset()
         state_current = nparray_to_tensor(state_current, DEVICE)
         state_previous = state_current
         #state = nparray_to_tensor(state, DEVICE)
         timestep = 0
-        while not done:            
+
+        while not done:
             timestep += 1
             state_with_diff = torch.cat((state_current[0], state_current[0] - state_previous[0]))
           
@@ -52,6 +61,7 @@ def main() -> None:
             action = agent.choose_action(epsilon, state_with_diff)
             next_state, reward, done, _ = env.step(action.item())
             next_state = nparray_to_tensor(next_state, DEVICE)
+            score += reward
             reward = torch.tensor([reward], device=DEVICE)
             terminal = torch.tensor([done], device=DEVICE)
             
@@ -60,7 +70,6 @@ def main() -> None:
             state_with_diff = state_with_diff[None, :]
             next_state_with_diff = next_state_with_diff[None, :]
 
-            
             #print(next_state_with_diff)
             # store (s, a, r, s+1, bool) in D
             agent.store_transition((state_with_diff, action, next_state_with_diff, reward, terminal))
@@ -79,11 +88,10 @@ def main() -> None:
 
             # calculate loss
             loss = agent.get_loss(current_q, relavent_q, LOSS_FUNCTION)
-            print(i, ": ", loss)
+            # print(i, ": ", loss)
 
             # perform gradient descent
             agent.gradient_decent(loss)
-            
             
             #if time_step % C == 0: theta2 = theta1
             if timestep % TARGET_UPDATE == 0:
@@ -91,9 +99,23 @@ def main() -> None:
 
             # move to the next state
             if done:
+                latest_scores.append(score)
+                average_latest_scores.append(np.mean(latest_scores))
+                score = 0
+
+                if i % 10 == 0 and i > 0:
+                    plot.get_plot(average_latest_scores)
+
                 break
+
+            # save weights and plot as the agent improves
+            if done and np.mean(latest_scores) > average_best_score:
+                average_best_score = np.mean(latest_scores)
+
+                if average_best_score > 99:
+                    plot.get_plot(average_latest_scores)
+                    exit(0)
 
 
 if __name__ == "__main__":
     main()
-
