@@ -94,7 +94,7 @@ class Agent:
             return None
         return self.buffer.sample(self.batch_size)
 
-    def learn(self, gamma, experience) -> tuple:
+    def learn(self, gamma, experience, method) -> tuple:
         """
         learn _summary_
 
@@ -115,12 +115,22 @@ class Agent:
         rewards = torch.cat(batch.reward)
         terminals = torch.cat(batch.terminal)
 
-        with torch.no_grad():
-            target_q_values = self.target_value_network(next_states)
-        self.optimiser.zero_grad()
-
-        current_q_values = self.action_value_network(states)
-        max_next_q_values = torch.max(target_q_values, 1)[0]
+        if method == "double":
+            with torch.no_grad():
+                self.action_value_network.eval()
+                action_q_values = self.action_value_network(next_states)
+                target_q_values = self.target_value_network(next_states)
+            self.action_value_network.train()
+            self.optimiser.zero_grad()
+            current_q_values = self.action_value_network(states)
+            argmax_next_q_values = torch.max(target_q_values, 1)[1]
+            max_next_q_values = torch.gather(target_q_values, 1, argmax_next_q_values.view(-1, 1)).squeeze()
+        else:
+            with torch.no_grad():
+                target_q_values = self.target_value_network(next_states)
+            self.optimiser.zero_grad()
+            current_q_values = self.action_value_network(states)
+            max_next_q_values = torch.max(target_q_values, 1)[0]
                
         # terminal states should have V(s) = max(Q(s,a)) = 0
         max_next_q_values[terminals] = 0
@@ -129,7 +139,7 @@ class Agent:
 
         relavent_q_values = torch.gather(current_q_values, 1, actions.view(-1, 1)).squeeze()
 
-        return relavent_q_values, expected_q_values, expected_q_values
+        return relavent_q_values, expected_q_values, expected_q_values        
 
     def get_loss(self, current, expected, function) -> Union[nn.HuberLoss, nn.MSELoss]:
         #print(current,"                ", expected)
