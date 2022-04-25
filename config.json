@@ -1,6 +1,6 @@
 {
   "method": "double",
-  "custom_name": "",
+  "custom_name": "test",
   "alpha": 1e-4,
   "gamma": 0.9,
   "epsilon_start": 1.0,
@@ -12,5 +12,6 @@
   "loss_function": "huberloss",
   "gradient_algorithm": "RMSprop",
   "target_update": 500,
-  "seed": 10
+  "seed": 10,
+  "dueling": "True"
 }
