@@ -24,6 +24,11 @@ def main() -> None:
     LOSS_FUNCTION: Final = config['loss_function']
     TARGET_UPDATE: Final = config['target_update']
 
+    METHOD: Final = "Vanilla"
+    CUSTOM_NAME: Final = "Test"
+    
+    NET_SAVE_PATH: Final = f"net/net_boxing-v5_{METHOD}DQN_{CUSTOM_NAME}.pth"
+
     DEVICE: Final = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     env = gym.make("ALE/Boxing-ram-v5")
@@ -38,13 +43,12 @@ def main() -> None:
         device=DEVICE,
     )
 
-    plot = Plot()
+    plot = Plot(METHOD, CUSTOM_NAME)
     latest_scores = deque(maxlen=100) # store the latest 100 scores
     average_latest_scores = []
     score = average_best_score = 0
 
     for i in range(TOTAL_EPISODE_COUNT):
-        print(f"Episode: {i+1}")
         done = False
         state_current = env.reset()
         state_current = nparray_to_tensor(state_current, DEVICE)
@@ -103,18 +107,20 @@ def main() -> None:
                 average_latest_scores.append(np.mean(latest_scores))
                 score = 0
 
+                # plot every 10 episodes
                 if i % 10 == 0 and i > 0:
                     plot.get_plot(average_latest_scores)
+                    agent.get_weights(NET_SAVE_PATH)
+
+                if np.mean(latest_scores) > average_best_score:
+                    agent.get_weights(NET_SAVE_PATH)
+                    average_best_score = np.mean(latest_scores)
+
+                    if average_best_score > 99:
+                        plot.get_plot(average_latest_scores)
+                        exit(0)
 
                 break
-
-            # save weights and plot as the agent improves
-            if done and np.mean(latest_scores) > average_best_score:
-                average_best_score = np.mean(latest_scores)
-
-                if average_best_score > 99:
-                    plot.get_plot(average_latest_scores)
-                    exit(0)
 
 
 if __name__ == "__main__":

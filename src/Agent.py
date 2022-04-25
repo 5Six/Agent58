@@ -155,3 +155,6 @@ class Agent:
             optimiser = optim.Adam(self.action_value_network.parameters(), lr=self.learning_rate)
 
         return optimiser
+
+    def get_weights(self, net_save_path):
+        torch.save(self.action_value_network.state_dict(), net_save_path)
