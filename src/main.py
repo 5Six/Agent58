@@ -111,7 +111,7 @@ def main() -> None:
 
                 # save weight and plot when agent get a high score
                 if np.mean(latest_scores) > average_best_score:
-                    agent.get_weights()
+                    agent.save_weights()
                     average_best_score = np.mean(latest_scores)
 
                     if average_best_score > 99:

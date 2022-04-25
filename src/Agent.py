@@ -173,8 +173,9 @@ class Agent:
 
         return optimiser
 
-    def get_weights(self):
-        torch.save(self.action_value_network.state_dict(), self.net_save_path)
+    def save_weights(self):
+        torch.save(self.action_value_network.state_dict(), self.net_save_path+"_action_net.pth")
+        torch.save(self.target_value_network.state_dict(), self.net_save_path+"_target_net.pth")
 
     def get_save_path(self, method, custom_name):
         if custom_name:
@@ -185,4 +186,4 @@ class Agent:
         while os.path.exists(f"{save_path}_{i}.pth"):
             i += 1
     
-        return f"{save_path}_{i}.pth"
+        return f"{save_path}_{i}"
