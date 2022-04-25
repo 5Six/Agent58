@@ -1,5 +1,4 @@
 import json
-from typing import Final
 import torch
 import numpy as np, time
 import gym
@@ -16,20 +15,20 @@ def main() -> None:
     with open("config.json", "r") as f:
         config = json.load(f)
 
-    GAMMA: Final = config['gamma']
-    EPSILON: Final = config['epsilon_start']
-    EPSILON_FINAL: Final = config['epsilon_final']
-    EPSILON_DECAY: Final = config['epsilon_decay']
-    TOTAL_EPISODE_COUNT: Final = config['total_episode_count']
-    LOSS_FUNCTION: Final = config['loss_function']
-    TARGET_UPDATE: Final = config['target_update']
+    GAMMA = config['gamma']
+    EPSILON = config['epsilon_start']
+    EPSILON_FINAL = config['epsilon_final']
+    EPSILON_DECAY = config['epsilon_decay']
+    TOTAL_EPISODE_COUNT = config['total_episode_count']
+    LOSS_FUNCTION = config['loss_function']
+    TARGET_UPDATE = config['target_update']
 
-    DEVICE: Final = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     env = gym.make("ALE/Boxing-ram-v5")
 
-    STATE_SPACE: Final = env.observation_space.shape[0]
-    ACTION_SPACE: Final = env.action_space.n
+    STATE_SPACE = env.observation_space.shape[0]
+    ACTION_SPACE = env.action_space.n
 
     agent = Agent(
         config=config,
@@ -43,7 +42,7 @@ def main() -> None:
     average_latest_scores = []
     score = average_best_score = 0
     t0 = time.time()
-    print(f"Training starting for {config['method']} DQN {config['custom_name']}")
+    print(f"Training: {config['method']} DQN {config['custom_name']}")
 
     for i in range(TOTAL_EPISODE_COUNT):
         done = False
