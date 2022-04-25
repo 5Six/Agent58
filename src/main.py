@@ -1,7 +1,7 @@
 import json
 from typing import Final
 import torch
-import numpy as np
+import numpy as np, time
 import gym
 from collections import deque
 
@@ -12,9 +12,6 @@ from Utils import Plot
 
 
 def main() -> None:
-    METHOD: Final = "double"
-    CUSTOM_NAME: Final = "test"
-
     # load in config file
     with open("config.json", "r") as f:
         config = json.load(f)
@@ -26,7 +23,6 @@ def main() -> None:
     TOTAL_EPISODE_COUNT: Final = config['total_episode_count']
     LOSS_FUNCTION: Final = config['loss_function']
     TARGET_UPDATE: Final = config['target_update']
-    NET_SAVE_PATH: Final = f"net/net_boxing-v5_{METHOD}DQN_{CUSTOM_NAME}.pth"
 
     DEVICE: Final = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -42,10 +38,12 @@ def main() -> None:
         device=DEVICE,
     )
 
-    plot = Plot(METHOD, CUSTOM_NAME)
+    plot = Plot(config)
     latest_scores = deque(maxlen=100) # store the latest 100 scores
     average_latest_scores = []
     score = average_best_score = 0
+    t0 = time.time()
+    print(f"Training starting for {config['method']} DQN {config['custom_name']}")
 
     for i in range(TOTAL_EPISODE_COUNT):
         done = False
@@ -87,7 +85,7 @@ def main() -> None:
                 continue
 
             # learn from NN
-            current_q, expected_q, relavent_q = agent.learn(GAMMA, minibatch, METHOD)
+            current_q, expected_q, relavent_q = agent.learn(GAMMA, minibatch)
 
             # calculate loss
             loss = agent.get_loss(current_q, relavent_q, LOSS_FUNCTION)
@@ -107,17 +105,19 @@ def main() -> None:
                 score = 0
 
                 # plot every 10 episodes
-                if i % 10 == 0 and i > 0:
+                if i % 10 == 0:
+                    print(f"Episode {i}; Epsilon {epsilon:.3f}; Time {time.time()-t0:.2f}; Last 100 avg scores {np.mean(latest_scores):.1f}")
                     plot.get_plot(average_latest_scores)
-                    # agent.get_weights(NET_SAVE_PATH)
+                    # agent.get_weights()
 
                 # save weight and plot when agent get a high score
                 if np.mean(latest_scores) > average_best_score:
-                    agent.get_weights(NET_SAVE_PATH)
+                    agent.get_weights()
                     average_best_score = np.mean(latest_scores)
 
                     if average_best_score > 99:
                         plot.get_plot(average_latest_scores)
+                        print("Training complete.")
                         exit(0)
 
                 break

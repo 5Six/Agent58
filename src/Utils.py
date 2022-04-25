@@ -14,10 +14,10 @@ def nparray_to_tensor(nparray, device: torch.device = torch.device("cpu")) -> to
 
 
 class Plot:
-    def __init__(self, method='', custom_name=''):
+    def __init__(self, config):
         self.x_label = "Episodes"
         self.y_label = "Last 100 average score"
-        self.plot_save_path = self.get_save_path(method, custom_name)
+        self.plot_save_path = self.get_save_path(config)
 
     def get_plot(self, average_latest_scores):
         plt.close("all")
@@ -26,7 +26,10 @@ class Plot:
         plt.ylabel(self.y_label)
         plt.savefig(self.plot_save_path)
 
-    def get_save_path(self, method, custom_name):
+    def get_save_path(self, config):
+        method = config['method']
+        custom_name = config['custom_name']
+
         if custom_name:
             custom_name = "_" + custom_name
         save_path = f"plot/plot_boxing-v5_{method}DQN{custom_name}"

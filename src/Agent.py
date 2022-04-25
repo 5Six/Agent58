@@ -1,4 +1,5 @@
 from collections import namedtuple
+import os
 import copy
 from typing import Union
 import torch
@@ -47,7 +48,9 @@ class Agent:
         self.action_value_network = Net(state_space, action_space).to(device)
         self.target_value_network = copy.deepcopy(self.action_value_network)
         self.optimiser = self.get_optimisation()
-
+        self.method = config['method']
+        self.net_save_path = self.get_save_path(self.method, config['custom_name'])
+        
     def choose_action(self, epsilon, state):
         """
         choose_action _summary_
@@ -94,7 +97,7 @@ class Agent:
             return None
         return self.buffer.sample(self.batch_size)
 
-    def learn(self, gamma, experience, method) -> tuple:
+    def learn(self, gamma, experience) -> tuple:
         """
         learn _summary_
 
@@ -115,7 +118,7 @@ class Agent:
         rewards = torch.cat(batch.reward)
         terminals = torch.cat(batch.terminal)
 
-        if method == "double":
+        if self.method == "double":
             with torch.no_grad():
                 self.action_value_network.eval()
                 action_q_values = self.action_value_network(next_states)
@@ -123,7 +126,7 @@ class Agent:
             self.action_value_network.train()
             self.optimiser.zero_grad()
             current_q_values = self.action_value_network(states)
-            argmax_next_q_values = torch.max(target_q_values, 1)[1]
+            argmax_next_q_values = torch.max(action_q_values, 1)[1]
             max_next_q_values = torch.gather(target_q_values, 1, argmax_next_q_values.view(-1, 1)).squeeze()
         else:
             with torch.no_grad():
@@ -158,7 +161,6 @@ class Agent:
         self.target_value_network.load_state_dict(self.action_value_network.state_dict())
 
     def get_optimisation(self):
-
         if self.gradient_algo.lower() == "rmsprop":
             optimiser = optim.RMSprop(self.action_value_network.parameters(), lr=self.learning_rate)
         else:
@@ -166,5 +168,16 @@ class Agent:
 
         return optimiser
 
-    def get_weights(self, net_save_path):
-        torch.save(self.action_value_network.state_dict(), net_save_path)
+    def get_weights(self):
+        torch.save(self.action_value_network.state_dict(), self.net_save_path)
+
+    def get_save_path(self, method, custom_name):
+        if custom_name:
+            custom_name = "_" + custom_name
+        save_path = f"net/net_boxing-v5_{method}DQN{custom_name}"
+
+        i = 1
+        while os.path.exists(f"{save_path}_{i}.pth"):
+            i += 1
+    
+        return f"{save_path}_{i}.pth"
