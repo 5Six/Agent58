@@ -7,7 +7,7 @@ from torch import nn
 from torch import optim
 import numpy as np
 from Replay import ReplayMemory
-from Net import Net
+from Net import Net, Dueling_DQN
 
 
 class Agent:
@@ -45,8 +45,13 @@ class Agent:
             "Transition", ("state", "action", "next_state", "reward", "terminal")
         )
         self.buffer = ReplayMemory(self.buffer_tuple, self.memory_capacity)
-        self.action_value_network = Net(state_space, action_space).to(device)
-        self.target_value_network = copy.deepcopy(self.action_value_network)
+        if config["dueling"] == "True":
+            self.action_value_network = Dueling_DQN(state_space, action_space).to(device)
+            self.target_value_network = copy.deepcopy(self.action_value_network)
+
+        else:
+            self.action_value_network = Net(state_space, action_space).to(device)
+            self.target_value_network = copy.deepcopy(self.action_value_network)
         self.optimiser = self.get_optimisation()
         self.method = config['method']
         self.net_save_path = self.get_save_path(self.method, config['custom_name'])
