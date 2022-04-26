@@ -1,2 +1,5 @@
 /.idea/*
 /__pycache__/*
+.vscode
+/src/__pycache__
+/src/.idea
