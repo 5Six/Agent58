@@ -6,7 +6,6 @@ import os
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 from collections import deque
-
 from Agent import Agent
 from Utils import nparray_to_tensor
 from Utils import load_data

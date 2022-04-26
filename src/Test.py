@@ -6,11 +6,14 @@ def test():
 	episodes = 1
 	# method = "vanilla"
 	method = "double"
-	custom_name = "test_69"
-	net_path = f"net/net_boxing-v5_{method}DQN_{custom_name}.pth"
+	custom_name = "best_1"
+	net_path = f"net/net_boxing-v5_{method}DQN_{custom_name}_action_net.pth"
+	device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 	net = Net(128, 18)
 	net.load_state_dict(torch.load(net_path))
 	net.eval()
+	net.to(device=device)
 
 	env = gym.make("ALE/Boxing-ram-v5", render_mode='human')
 	scores = []
