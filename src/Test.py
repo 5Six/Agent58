@@ -1,13 +1,14 @@
 from Net import Net
 import torch, gym
 import numpy as np
-
+from Utils import nparray_to_tensor
 def test():
 	episodes = 1
 	# method = "vanilla"
 	method = "double"
 	custom_name = "best_1"
 	net_path = f"net/net_boxing-v5_{method}DQN_{custom_name}_action_net.pth"
+	
 	device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 	net = Net(128, 18)
@@ -22,8 +23,8 @@ def test():
 		state_prev = state_curr = env.reset()
 		score = 0
 
-		while True:
-			x = torch.from_numpy(np.concatenate((state_curr, state_curr - state_prev))).float()
+		while True:		
+			x = torch.from_numpy(np.concatenate((state_curr, state_curr - state_prev))).float().to(device)
 			q = net(x)
 			qmax, a = torch.max(q, 0)
 			a = a.item()
