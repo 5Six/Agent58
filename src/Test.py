@@ -20,16 +20,25 @@ def test():
 	scores = []
 
 	for episode in range(episodes):
-		state_prev = state_curr = env.reset()
 		score = 0
+		state_current = env.reset()
+		state_current = nparray_to_tensor(state_current, device)
+		state_previous = state_current
 
 		while True:		
-			x = torch.from_numpy(np.concatenate((state_curr, state_curr - state_prev))).float().to(device)
-			q = net(x)
+			state_with_diff = torch.cat((state_current[0], state_current[0] - state_previous[0]))
+			q = net(state_with_diff)
 			qmax, a = torch.max(q, 0)
-			a = a.item()
-			state_prev = state_curr
-			state_curr, reward, done, _ = env.step(a)
+			action = a.item()
+
+			
+			next_state, reward, done, _ = env.step(action)
+			next_state = nparray_to_tensor(next_state, device)
+			next_state_with_diff = torch.cat((next_state[0], next_state[0] - state_current[0]))
+
+			state_previous = state_current
+			state_current = next_state
+
 			score += reward
 
 			if done:
