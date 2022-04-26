@@ -31,7 +31,6 @@ def test():
 			qmax, a = torch.max(q, 0)
 			action = a.item()
 
-			
 			next_state, reward, done, _ = env.step(action)
 			next_state = nparray_to_tensor(next_state, device)
 			next_state_with_diff = torch.cat((next_state[0], next_state[0] - state_current[0]))
