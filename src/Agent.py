@@ -87,8 +87,9 @@ class Agent:
         q_value = self.action_value_network(transition[0]).squeeze()[action].item()
         max_q_value_next = torch.max(self.target_value_network(transition[2])[0]).item()
         target_q_value = reward + gamma * max_q_value_next
-
-        td_error = abs(q_value - target_q_value)
+        E = 0.5
+        td_error = abs(q_value - target_q_value) + E
+        #print(td_error)
         self.buffer.push(td_error, (transition[0], transition[1], transition[2], transition[3], transition[4]))
 
     @property
@@ -102,7 +103,7 @@ class Agent:
 
         return self.buffer.sample(self.batch_size)
 
-    def learn(self, gamma, experience, weights) -> tuple:
+    def learn(self, gamma, experience) -> tuple:
         """
         learn _summary_
 
@@ -147,12 +148,12 @@ class Agent:
 
         relavent_q_values = torch.gather(current_q_values, 1, actions.view(-1, 1)).squeeze()
         
-        offset = 0.5
-        loss  = (relavent_q_values -  expected_q_values).pow(2) * weights
-        prios = loss + 1e-5 #+offset
-        loss  = loss.mean()
-
-        return relavent_q_values, expected_q_values, expected_q_values, loss
+        #offset = 0.5
+        #loss  = (relavent_q_values -  expected_q_values).pow(2) * weights
+        #prios = loss + 1e-5 #+offset
+        #loss  = loss.mean()
+        
+        return relavent_q_values, expected_q_values, expected_q_values
 
     def get_loss(self, current, expected, function) -> Union[nn.HuberLoss, nn.MSELoss]:
         #print(current,"                ", expected)

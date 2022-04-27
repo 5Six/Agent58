@@ -82,6 +82,7 @@ def main() -> None:
             minibatch = agent.sample_experience
 
             minibatch, weights, indicies = agent.sample_experience
+
             
             # move to the next state
 
@@ -93,15 +94,14 @@ def main() -> None:
 
             weights_tensor = torch.tensor([weights], device=DEVICE)
             # learn from NN
-            current_q, expected_q, relavent_q, loss  = agent.learn(GAMMA, minibatch, weights_tensor)
+            current_q, expected_q, relavent_q  = agent.learn(GAMMA, minibatch)
             
 
             #calculate loss
-            #loss = agent.get_loss(current_q, relavent_q, LOSS_FUNCTION, weights)
+            loss = agent.get_loss(current_q, relavent_q, LOSS_FUNCTION)
             
             #perform gradient descent
             agent.gradient_decent(loss)
-
             
             agent.buffer.update(indicies, weights)
 
