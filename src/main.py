@@ -103,7 +103,7 @@ def main() -> None:
             #perform gradient descent
             agent.gradient_decent(loss)
             
-            agent.buffer.update(indicies, weights)
+            #agent.buffer.update(indicies, weights)
 
             # if time_step % C == 0: theta2 = theta1
             if timestep % TARGET_UPDATE == 0:

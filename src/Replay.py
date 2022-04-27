@@ -5,9 +5,12 @@ import numpy as np
 
 
 class PriorityReplayMemory(object):
-    e = 0.01
+    #offset
+    e = 0.01 
+    #randomness factor 0 = random 1 = only highest prio
     a = 0
-    beta = 0.3
+    #beta should anneal up to 1 over the duration of training
+    beta = 0.1
     beta_increment_per_sampling = 0.0005
 
     def __init__(self, transition_format, capacity: int) -> None:
@@ -47,18 +50,15 @@ class PriorityReplayMemory(object):
         is_weight = np.power(self.tree.n_entries * sampling_probabilities, -self.beta)
         is_weight /= is_weight.max()
         #print(batch)
+        self.update(idxs, is_weight)
         return batch, is_weight, idxs
-
-    def update(self, idx, error):
-        p = self._get_priority(error)
-        self.tree.update(idx, p)
 
 
     def update(self, indices, priorities):
         """ Update sample priorities """
         for i, p in zip(indices, priorities):
-            p = 1e-10 + p
             self.tree.update(i, p)
+            #print(p)
         
 
 
@@ -121,5 +121,4 @@ class SumTree:
     def get(self, s):
         idx = self._retrieve(0, s)
         dataIdx = idx - self.capacity + 1
-
         return (idx, self.tree[idx], self.data[dataIdx])
