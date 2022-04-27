@@ -6,7 +6,7 @@ import torch
 from torch import nn
 from torch import optim
 import numpy as np
-from Replay import ReplayMemory
+from Replay import PriorityReplayMemory
 from Net import Net, Dueling_DQN
 
 
@@ -44,7 +44,7 @@ class Agent:
         self.buffer_tuple = namedtuple(
             "Transition", ("state", "action", "next_state", "reward", "terminal")
         )
-        self.buffer = ReplayMemory(self.buffer_tuple, self.memory_capacity)
+        self.buffer = PriorityReplayMemory(self.buffer_tuple, self.memory_capacity)
         if config["dueling"] == "True":
             self.action_value_network = Dueling_DQN(state_space, action_space).to(device)
             self.target_value_network = copy.deepcopy(self.action_value_network)
@@ -81,8 +81,15 @@ class Agent:
 
         return action
 
-    def store_transition(self, transition: tuple) -> None:
-        self.buffer.push(transition[0], transition[1], transition[2], transition[3], transition[4])
+    def store_transition(self, transition: tuple, gamma) -> None:
+        reward = transition[3].item()
+        action = transition[1].item()
+        q_value = self.action_value_network(transition[0]).squeeze()[action].item()
+        max_q_value_next = torch.max(self.target_value_network(transition[2])[0]).item()
+        target_q_value = reward + gamma * max_q_value_next
+
+        td_error = abs(q_value - target_q_value)
+        self.buffer.push(td_error, (transition[0], transition[1], transition[2], transition[3], transition[4]))
 
     @property
     def sample_experience(self):
@@ -92,8 +99,7 @@ class Agent:
         Returns:
             _type_: _description_
         """
-        if len(self.buffer) < self.batch_size:
-            return None, None, None
+
         return self.buffer.sample(self.batch_size)
 
     def learn(self, gamma, experience, weights) -> tuple:

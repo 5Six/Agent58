@@ -74,8 +74,9 @@ def main() -> None:
 
             #print(next_state_with_diff)
             # store (s, a, r, s+1, bool) in D
-            agent.store_transition((state_with_diff, action, next_state_with_diff, reward, terminal))
 
+            agent.store_transition((state_with_diff, action, next_state_with_diff, reward, terminal),gamma=GAMMA)
+    
             # sample random minibatch of (st,at, r, st+1) from D
 
             minibatch = agent.sample_experience
@@ -101,7 +102,8 @@ def main() -> None:
             #perform gradient descent
             agent.gradient_decent(loss)
 
-            agent.buffer.set_priorities(indicies, weights)
+            
+            agent.buffer.update(indicies, weights)
 
             # if time_step % C == 0: theta2 = theta1
             if timestep % TARGET_UPDATE == 0:
