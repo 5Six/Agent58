@@ -80,7 +80,7 @@ def main() -> None:
 
             minibatch = agent.sample_experience
 
-            minibatch, importance, indicies = agent.sample_experience
+            minibatch, weights, indicies = agent.sample_experience
             
             # move to the next state
 
@@ -90,18 +90,18 @@ def main() -> None:
             if minibatch is None:              
                 continue
 
+            weights_tensor = torch.tensor([weights], device=DEVICE)
             # learn from NN
-            current_q, expected_q, relavent_q, errors  = agent.learn(GAMMA, minibatch, importance)
+            current_q, expected_q, relavent_q, loss  = agent.learn(GAMMA, minibatch, weights_tensor)
             
-            agent.buffer.set_priorities(indicies, errors)
 
-            # calculate loss
-            loss = agent.get_loss(current_q, relavent_q, LOSS_FUNCTION)
+            #calculate loss
+            #loss = agent.get_loss(current_q, relavent_q, LOSS_FUNCTION, weights)
             
             #perform gradient descent
             agent.gradient_decent(loss)
 
-            
+            agent.buffer.set_priorities(indicies, weights)
 
             # if time_step % C == 0: theta2 = theta1
             if timestep % TARGET_UPDATE == 0:

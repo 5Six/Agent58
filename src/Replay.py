@@ -16,30 +16,29 @@ class ReplayMemory(object):
         self.priorities.append(max(self.priorities, default=1))
 
   
-    def get_probabilities(self, priority_scale):
-        #print(self.priorities)
-        scaled_priorities = np.array((self.priorities)) ** priority_scale
-        sample_probabilities = scaled_priorities / sum(scaled_priorities)
-        return sample_probabilities
 
 
-    def get_importance(self, probabilities):
+    def get_importance(self, probabilities, beta =0.4):
         importance = 1/len(self.memory) * 1/probabilities
         importance_normalized = importance / max(importance)
         return importance_normalized
         
     def sample(self, batch_size, priority_scale=1.0):
         sample_size = min(len(self.memory), batch_size)
-        sample_probs = self.get_probabilities(priority_scale)
-        sample_indices = random.choices(range(len(self.memory)), k=sample_size, weights=sample_probs)
-        samples = []
-        #random_samples = random.sample(self.memory, batch_size)
-        for i in sample_indices:
-            samples.append(self.memory[i])
         
-        #samples = np.array(self.memory)[sample_indices]
-        importance = self.get_importance(sample_probs[sample_indices])
-        return samples, importance, sample_indices
+        probs = np.array((self.priorities)) ** priority_scale
+        probs /= probs.sum()
+        
+        sample_indices = random.choices(range(len(self.memory)), k=sample_size, weights=probs)
+        samples = [self.memory[idx] for idx in sample_indices]
+        
+        total = len(self.memory)
+        beta=0.4
+        weights = (total * probs[sample_indices]) ** (-beta)
+        weights /= weights.max()
+        #weights = np.array(weights, dtype = np.float32)
+
+        return samples, weights, sample_indices
     
     def set_priorities(self, indices, errors, offset=0.1):
         count = 0
@@ -50,3 +49,4 @@ class ReplayMemory(object):
 
     def __len__(self) -> int:
         return len(self.memory)
+

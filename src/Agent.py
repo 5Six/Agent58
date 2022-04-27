@@ -96,7 +96,7 @@ class Agent:
             return None, None, None
         return self.buffer.sample(self.batch_size)
 
-    def learn(self, gamma, experience,importance) -> tuple:
+    def learn(self, gamma, experience, weights) -> tuple:
         """
         learn _summary_
 
@@ -142,9 +142,11 @@ class Agent:
         relavent_q_values = torch.gather(current_q_values, 1, actions.view(-1, 1)).squeeze()
         
         offset = 0.5
-        errors = ((relavent_q_values - expected_q_values) + offset)
+        loss  = (relavent_q_values -  expected_q_values).pow(2) * weights
+        prios = loss + 1e-5 #+offset
+        loss  = loss.mean()
 
-        return relavent_q_values, expected_q_values, expected_q_values, errors
+        return relavent_q_values, expected_q_values, expected_q_values, loss
 
     def get_loss(self, current, expected, function) -> Union[nn.HuberLoss, nn.MSELoss]:
         #print(current,"                ", expected)
@@ -156,7 +158,6 @@ class Agent:
         return loss_function(current, expected).to(self.device)
 
     def gradient_decent(self, loss: Union[nn.HuberLoss, nn.MSELoss]) -> None:
-        
         loss.backward()
         self.optimiser.step()
 
