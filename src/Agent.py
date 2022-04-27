@@ -82,12 +82,15 @@ class Agent:
         return action
 
     def store_transition(self, transition: tuple) -> None:
+<<<<<<< Updated upstream
         """
         store_transition _summary_
 
         Args:
             transition (tuple): _description_
         """
+=======
+>>>>>>> Stashed changes
         self.buffer.push(transition[0], transition[1], transition[2], transition[3], transition[4])
 
     @property
@@ -99,7 +102,7 @@ class Agent:
             _type_: _description_
         """
         if len(self.buffer) < self.batch_size:
-            return None
+            return None, None, None
         return self.buffer.sample(self.batch_size)
 
     def learn(self, gamma, experience) -> tuple:
@@ -146,8 +149,15 @@ class Agent:
         expected_q_values = (rewards + (gamma * max_next_q_values).squeeze())
 
         relavent_q_values = torch.gather(current_q_values, 1, actions.view(-1, 1)).squeeze()
+        errors = []
 
+        errors = ((relavent_q_values - expected_q_values) + offset)
+
+<<<<<<< Updated upstream
         return relavent_q_values, expected_q_values, expected_q_values        
+=======
+        return relavent_q_values, expected_q_values, expected_q_values, errors
+>>>>>>> Stashed changes
 
     def get_loss(self, current, expected, function) -> Union[nn.HuberLoss, nn.MSELoss]:
         #print(current,"                ", expected)
@@ -159,6 +169,7 @@ class Agent:
         return loss_function(current, expected).to(self.device)
 
     def gradient_decent(self, loss: Union[nn.HuberLoss, nn.MSELoss]) -> None:
+        
         loss.backward()
         self.optimiser.step()
 

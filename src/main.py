@@ -77,8 +77,14 @@ def main() -> None:
             agent.store_transition((state_with_diff, action, next_state_with_diff, reward, terminal))
 
             # sample random minibatch of (st,at, r, st+1) from D
+<<<<<<< Updated upstream
             minibatch = agent.sample_experience
 
+=======
+            minibatch, importance, indicies = agent.sample_experience
+            
+            # move to the next state
+>>>>>>> Stashed changes
             state_previous = state_current
             state_current = next_state
 
@@ -86,16 +92,28 @@ def main() -> None:
                 continue
 
             # learn from NN
-            current_q, expected_q, relavent_q = agent.learn(GAMMA, minibatch)
+            current_q, expected_q, relavent_q, errors  = agent.learn(GAMMA, minibatch, importance)
+            
+            agent.buffer.set_priorities(indicies, errors)
 
             # calculate loss
             loss = agent.get_loss(current_q, relavent_q, LOSS_FUNCTION)
+<<<<<<< Updated upstream
             # print(i, ": ", loss)
 
             # perform gradient descent
             agent.gradient_decent(loss)
             
             #if time_step % C == 0: theta2 = theta1
+=======
+            
+            #perform gradient descent
+            agent.gradient_decent(loss)
+
+            
+
+            # if time_step % C == 0: theta2 = theta1
+>>>>>>> Stashed changes
             if timestep % TARGET_UPDATE == 0:
                 agent.update_target_network()
 
