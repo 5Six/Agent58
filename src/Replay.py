@@ -49,7 +49,8 @@ class PriorityReplayMemory(object):
         #updating importance Sampling Weights
         is_weight = np.power(self.tree.n_entries * sampling_probabilities, -self.beta)
         is_weight /= is_weight.max()
-        #print(batch)
+        #Think updating here might be wrong, pretty sure the importance value is_weight may need to be put 
+        #through the q network instead
         self.update(idxs, is_weight)
         return batch, is_weight, idxs
 
