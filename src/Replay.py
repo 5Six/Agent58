@@ -8,9 +8,9 @@ class PriorityReplayMemory(object):
     #offset
     e = 0.01 
     #randomness factor 0 = random 1 = only highest prio
-    a = 0
+    a = 0.7
     #beta should anneal up to 1 over the duration of training
-    beta = 0.1
+    beta = 0.5
     beta_increment_per_sampling = 0.0005
 
     def __init__(self, transition_format, capacity: int) -> None:
