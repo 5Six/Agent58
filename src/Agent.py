@@ -43,6 +43,7 @@ class Agent:
         self.state_space = state_space
         self.gradient_algo = config['gradient_algorithm']
         self.device = device
+        self.LOSS_FUNCTION = config['loss_function']
         self.buffer_tuple = namedtuple(
             "Transition", ("state", "action", "next_state", "reward", "terminal")
         )
@@ -99,7 +100,6 @@ class Agent:
                 target_q_value = reward + gamma * max_q_value_next
             E = 0.5
             td_error = abs(q_value - target_q_value)
-            #print(td_error)
             self.buffer.push(td_error, (transition[0], transition[1], transition[2], transition[3], transition[4]))
         else:
             self.buffer.push(transition[0], transition[1], transition[2], transition[3], transition[4])
@@ -112,6 +112,10 @@ class Agent:
         Returns:
             _type_: _description_
         """
+        if self.config['per'] != "True":
+            if len(self.buffer) < self.batch_size:
+                return None
+
         return self.buffer.sample(self.batch_size)
         
 
@@ -176,10 +180,9 @@ class Agent:
             #and train
             self.optimiser.step()
         else:
-            loss = (F.mse_loss(pred, target)).mean()
-            loss.backward()
-            #and train
-            self.optimiser.step()
+            
+            loss = self.get_loss(relavent_q_values, expected_q_values, self.LOSS_FUNCTION)
+            self.gradient_decent(loss)
              
         return relavent_q_values, expected_q_values, expected_q_values
 
@@ -216,9 +219,8 @@ class Agent:
         custom_name = self.config['custom_name']
         using_per = ""
         if self.config['per'] == "True":
-            using_per = "Using_PER"
-        if custom_name:
-            custom_name = "_" + custom_name
+            using_per = "Using_PER_"
+        
       
         save_path = f"net/net_boxing-v5_{method}DQN_{using_per}{custom_name}"
 

@@ -78,10 +78,11 @@ def main() -> None:
     
             # sample random minibatch of (st,at, r, st+1) from D
 
-            minibatch = agent.sample_experience
-
-            minibatch, weights, indicies = agent.sample_experience
-          
+            if config['per'] == "True":
+                minibatch, weights, indicies = agent.sample_experience
+            else:
+                minibatch = agent.sample_experience
+            
             # move to the next state
             state_previous = state_current
             state_current = next_state
@@ -94,6 +95,8 @@ def main() -> None:
             else:
                 if minibatch is None:              
                     continue
+                
+                current_q, expected_q, relavent_q  = agent.learn(GAMMA, minibatch, None, None)
             # learn from NN
            
             

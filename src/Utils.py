@@ -31,9 +31,8 @@ class Plot:
         custom_name = config['custom_name']
         using_per = ""
         if config['per'] == "True":
-            using_per = "Using_PER"
-        if custom_name:
-            custom_name = "_" + custom_name
+            using_per = "Using_PER_"
+
         save_path = f"plot/plot_boxing-v5_{method}DQN_{using_per}{custom_name}"
 
         i = 1
