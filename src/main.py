@@ -45,7 +45,6 @@ def main() -> None:
     score = average_best_score = 0
     t0 = time.time()
     print(f"Training: {config['method']} DQN {config['custom_name']}")
-
     for i in range(TOTAL_EPISODE_COUNT):
         done = False
         state_current = env.reset()
@@ -82,29 +81,28 @@ def main() -> None:
             minibatch = agent.sample_experience
 
             minibatch, weights, indicies = agent.sample_experience
-
-            
+          
             # move to the next state
-
             state_previous = state_current
             state_current = next_state
 
             if minibatch is None:              
                 continue
-
-            weights_tensor = torch.tensor([weights], device=DEVICE)
+            
+            if agent.buffer.tree.n_entries >= agent.batch_size:
+                current_q, expected_q, relavent_q  = agent.learn(GAMMA, minibatch, indicies, weights)
+            else:
+                continue
             # learn from NN
-            current_q, expected_q, relavent_q  = agent.learn(GAMMA, minibatch)
+           
             
 
             #calculate loss
-            loss = agent.get_loss(current_q, relavent_q, LOSS_FUNCTION)
+            #loss = agent.get_loss(current_q, relavent_q, LOSS_FUNCTION)
             
             #perform gradient descent
-            agent.gradient_decent(loss)
+            #agent.gradient_decent(weights_tensor)
             
-            #agent.buffer.update(indicies, weights)
-
             # if time_step % C == 0: theta2 = theta1
             if timestep % TARGET_UPDATE == 0:
                 agent.update_target_network()

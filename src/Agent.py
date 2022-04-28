@@ -6,6 +6,7 @@ import torch
 from torch import nn
 from torch import optim
 import numpy as np
+import torch.nn.functional as F
 from Replay import PriorityReplayMemory
 from Net import Net, Dueling_DQN
 
@@ -86,7 +87,10 @@ class Agent:
         action = transition[1].item()
         q_value = self.action_value_network(transition[0]).squeeze()[action].item()
         max_q_value_next = torch.max(self.target_value_network(transition[2])[0]).item()
-        target_q_value = reward + gamma * max_q_value_next
+        if (transition[4] == True):
+            target_q_value = reward
+        else:
+            target_q_value = reward + gamma * max_q_value_next
         E = 0.5
         td_error = abs(q_value - target_q_value)
         #print(td_error)
@@ -103,7 +107,7 @@ class Agent:
 
         return self.buffer.sample(self.batch_size)
 
-    def learn(self, gamma, experience) -> tuple:
+    def learn(self, gamma, experience, idxs, weights) -> tuple:
         """
         learn _summary_
 
@@ -118,7 +122,6 @@ class Agent:
         batch = self.buffer_tuple(*zip(*experience))
     
         states = torch.cat(batch.state)
-        test = states.shape
         actions = torch.cat(batch.action)
         next_states = torch.cat(batch.next_state)
         rewards = torch.cat(batch.reward)
@@ -147,6 +150,23 @@ class Agent:
         expected_q_values = (rewards + (gamma * max_next_q_values).squeeze())
 
         relavent_q_values = torch.gather(current_q_values, 1, actions.view(-1, 1)).squeeze()
+
+        pred = relavent_q_values
+
+        target = expected_q_values
+
+        errors = torch.abs(pred - target)
+
+        for i in range(self.batch_size):
+            idx = idxs[i]       
+            self.buffer.update(idx, errors[i].item())
+
+        weights = torch.tensor([weights], device=self.device)
+        loss = (weights * F.mse_loss(pred, target)).mean()
+        #print(loss)
+        loss.backward()
+        #and train
+        self.optimiser.step()
              
         return relavent_q_values, expected_q_values, expected_q_values
 

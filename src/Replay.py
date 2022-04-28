@@ -8,10 +8,10 @@ class PriorityReplayMemory(object):
     #offset
     e = 0.01 
     #randomness factor 0 = random 1 = only highest prio
-    a = 0.7
+    a = 0.6
     #beta should anneal up to 1 over the duration of training
-    beta = 0.5
-    beta_increment_per_sampling = 0.0005
+    beta = 0.4
+    beta_increment_per_sampling = 0.0001
 
     def __init__(self, transition_format, capacity: int) -> None:
         self.memory = PriorityQueue(maxsize=capacity) 
@@ -51,15 +51,13 @@ class PriorityReplayMemory(object):
         is_weight /= is_weight.max()
         #Think updating here might be wrong, pretty sure the importance value is_weight may need to be put 
         #through the q network instead
-        self.update(idxs, is_weight)
+
         return batch, is_weight, idxs
 
 
-    def update(self, indices, priorities):
-        """ Update sample priorities """
-        for i, p in zip(indices, priorities):
-            self.tree.update(i, p)
-            #print(p)
+    def update(self, idx, error):
+        p = self._get_priority(error)
+        self.tree.update(idx, p)    
         
 
 
