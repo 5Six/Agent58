@@ -173,8 +173,8 @@ class Agent:
             for i in range(self.batch_size):
                 idx = idxs[i]       
                 self.buffer.update(idx, errors[i].item())
-
-            weights = torch.tensor([weights], device=self.device)
+            
+            weights =  torch.from_numpy(weights).to(self.device)
             loss = (weights * F.mse_loss(pred, target)).mean()
             loss.backward()
             #and train
@@ -187,7 +187,6 @@ class Agent:
         return relavent_q_values, expected_q_values, expected_q_values
 
     def get_loss(self, current, expected, function) -> Union[nn.HuberLoss, nn.MSELoss]:
-        #print(current,"                ", expected)
         if function.lower() == "huberloss":
             loss_function = nn.SmoothL1Loss()
         else:
