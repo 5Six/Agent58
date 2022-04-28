@@ -1,8 +1,22 @@
 from collections import deque
-from queue import PriorityQueue
 import random
+
 import numpy as np
 
+class ReplayMemory(object):
+    def __init__(self, transition_format, capacity: int) -> None:
+        self.memory = deque([], maxlen=capacity)
+        self.transition = transition_format
+
+    def push(self, *args) -> None:
+        """Save a transition"""
+        self.memory.append(self.transition(*args))
+
+    def sample(self, batch_size):
+        return random.sample(self.memory, batch_size)
+
+    def __len__(self) -> int:
+        return len(self.memory)
 
 class PriorityReplayMemory(object):
     #offset
@@ -13,10 +27,14 @@ class PriorityReplayMemory(object):
     beta = 0.4
     beta_increment_per_sampling = 0.0001
 
-    def __init__(self, transition_format, capacity: int) -> None:
-        self.memory = PriorityQueue(maxsize=capacity) 
+    def __init__(self, transition_format, capacity: int, offset, alpha, beta, beta_increment_per_sampling) -> None:
+        #self.memory = PriorityQueue(maxsize=capacity) 
         self.transition = transition_format
         self.priorities = deque(maxlen=capacity)
+        self.e = offset
+        self.a = alpha
+        self.beta = beta
+        self.beta_increment_per_sampling = beta_increment_per_sampling
 
         self.tree = SumTree(capacity)
         self.capacity = capacity

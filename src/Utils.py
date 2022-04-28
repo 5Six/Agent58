@@ -29,10 +29,12 @@ class Plot:
     def get_save_path(self, config):
         method = config['method']
         custom_name = config['custom_name']
-
+        using_per = ""
+        if config['per'] == "True":
+            using_per = "Using_PER"
         if custom_name:
             custom_name = "_" + custom_name
-        save_path = f"plot/plot_boxing-v5_{method}DQN{custom_name}"
+        save_path = f"plot/plot_boxing-v5_{method}DQN_{using_per}{custom_name}"
 
         i = 1
         while os.path.exists(f"{save_path}_{i}.png"):

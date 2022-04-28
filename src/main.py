@@ -44,7 +44,7 @@ def main() -> None:
     average_latest_scores = []
     score = average_best_score = 0
     t0 = time.time()
-    print(f"Training: {config['method']} DQN {config['custom_name']}")
+    print(f"Training: {config['method']} DQN {config['custom_name']} Using PER: {config['per']}")
     for i in range(TOTAL_EPISODE_COUNT):
         done = False
         state_current = env.reset()
@@ -85,14 +85,15 @@ def main() -> None:
             # move to the next state
             state_previous = state_current
             state_current = next_state
-
-            if minibatch is None:              
-                continue
-            
-            if agent.buffer.tree.n_entries >= agent.batch_size:
-                current_q, expected_q, relavent_q  = agent.learn(GAMMA, minibatch, indicies, weights)
+           
+            if config['per'] == "True":
+                if agent.buffer.tree.n_entries >= agent.batch_size:
+                    current_q, expected_q, relavent_q  = agent.learn(GAMMA, minibatch, indicies, weights)
+                else:
+                    continue
             else:
-                continue
+                if minibatch is None:              
+                    continue
             # learn from NN
            
             

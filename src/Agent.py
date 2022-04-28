@@ -8,6 +8,7 @@ from torch import optim
 import numpy as np
 import torch.nn.functional as F
 from Replay import PriorityReplayMemory
+from Replay import ReplayMemory
 from Net import Net, Dueling_DQN
 
 
@@ -32,7 +33,7 @@ class Agent:
             memory_capacity (int, optional): _description_. Defaults to 1000.
             batch_size (int, optional): _description_. Defaults to 32.
         """
-
+        self.config = config
         self.learning_rate = config['alpha']
         self.seed = config['seed']
         torch.manual_seed(self.seed)
@@ -45,7 +46,11 @@ class Agent:
         self.buffer_tuple = namedtuple(
             "Transition", ("state", "action", "next_state", "reward", "terminal")
         )
-        self.buffer = PriorityReplayMemory(self.buffer_tuple, self.memory_capacity)
+
+        if config['per'] == "True":
+            self.buffer = PriorityReplayMemory(self.buffer_tuple, self.memory_capacity, config['per_offset'], config['per_alpha'], config['per_beta'], config['per_beta_increment_per_sampling'])
+        else:
+            self.buffer = ReplayMemory(self.buffer_tuple, self.memory_capacity)
         if config["dueling"] == "True":
             self.action_value_network = Dueling_DQN(state_space, action_space).to(device)
             self.target_value_network = copy.deepcopy(self.action_value_network)
@@ -83,18 +88,21 @@ class Agent:
         return action
 
     def store_transition(self, transition: tuple, gamma) -> None:
-        reward = transition[3].item()
-        action = transition[1].item()
-        q_value = self.action_value_network(transition[0]).squeeze()[action].item()
-        max_q_value_next = torch.max(self.target_value_network(transition[2])[0]).item()
-        if (transition[4] == True):
-            target_q_value = reward
+        if self.config['per'] == "True":
+            reward = transition[3].item()
+            action = transition[1].item()
+            q_value = self.action_value_network(transition[0]).squeeze()[action].item()
+            max_q_value_next = torch.max(self.target_value_network(transition[2])[0]).item()
+            if (transition[4] == True):
+                target_q_value = reward
+            else:
+                target_q_value = reward + gamma * max_q_value_next
+            E = 0.5
+            td_error = abs(q_value - target_q_value)
+            #print(td_error)
+            self.buffer.push(td_error, (transition[0], transition[1], transition[2], transition[3], transition[4]))
         else:
-            target_q_value = reward + gamma * max_q_value_next
-        E = 0.5
-        td_error = abs(q_value - target_q_value)
-        #print(td_error)
-        self.buffer.push(td_error, (transition[0], transition[1], transition[2], transition[3], transition[4]))
+            self.buffer.push(transition[0], transition[1], transition[2], transition[3], transition[4])
 
     @property
     def sample_experience(self):
@@ -104,8 +112,8 @@ class Agent:
         Returns:
             _type_: _description_
         """
-
         return self.buffer.sample(self.batch_size)
+        
 
     def learn(self, gamma, experience, idxs, weights) -> tuple:
         """
@@ -151,22 +159,27 @@ class Agent:
 
         relavent_q_values = torch.gather(current_q_values, 1, actions.view(-1, 1)).squeeze()
 
-        pred = relavent_q_values
+        if self.config['per'] == "True":
+            pred = relavent_q_values
 
-        target = expected_q_values
+            target = expected_q_values
 
-        errors = torch.abs(pred - target)
+            errors = torch.abs(pred - target)
 
-        for i in range(self.batch_size):
-            idx = idxs[i]       
-            self.buffer.update(idx, errors[i].item())
+            for i in range(self.batch_size):
+                idx = idxs[i]       
+                self.buffer.update(idx, errors[i].item())
 
-        weights = torch.tensor([weights], device=self.device)
-        loss = (weights * F.mse_loss(pred, target)).mean()
-        #print(loss)
-        loss.backward()
-        #and train
-        self.optimiser.step()
+            weights = torch.tensor([weights], device=self.device)
+            loss = (weights * F.mse_loss(pred, target)).mean()
+            loss.backward()
+            #and train
+            self.optimiser.step()
+        else:
+            loss = (F.mse_loss(pred, target)).mean()
+            loss.backward()
+            #and train
+            self.optimiser.step()
              
         return relavent_q_values, expected_q_values, expected_q_values
 
@@ -199,9 +212,15 @@ class Agent:
         torch.save(self.target_value_network.state_dict(), self.net_save_path+"_target_net.pth")
 
     def get_save_path(self, method, custom_name):
+        method = self.config['method']
+        custom_name = self.config['custom_name']
+        using_per = ""
+        if self.config['per'] == "True":
+            using_per = "Using_PER"
         if custom_name:
             custom_name = "_" + custom_name
-        save_path = f"net/net_boxing-v5_{method}DQN{custom_name}"
+      
+        save_path = f"net/net_boxing-v5_{method}DQN_{using_per}{custom_name}"
 
         i = 1
         while os.path.exists(f"{save_path}_{i}.pth"):
