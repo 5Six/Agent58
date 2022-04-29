@@ -94,13 +94,10 @@ def main() -> None:
                     continue
             else:
                 if minibatch is None:              
-                    continue
-                
+                    continue                
                 current_q, expected_q, relavent_q  = agent.learn(GAMMA, minibatch, None, None)
             # learn from NN
            
-            
-
             #calculate loss
             #loss = agent.get_loss(current_q, relavent_q, LOSS_FUNCTION)
             

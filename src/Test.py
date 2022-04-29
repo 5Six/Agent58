@@ -3,12 +3,14 @@ import torch, gym
 import numpy as np
 from Utils import nparray_to_tensor
 def test():
-	episodes = 1
+	episodes = 1000
 	# method = "vanilla"
 	method = "double"
 	custom_name = "best_1"
-	net_path = f"net/net_boxing-v5_{method}DQN_{custom_name}_action_net.pth"
-	
+	using_per = ""
+    
+	net_path = f"net/net_boxing-v5_{method}DQN_{custom_name}{using_per}_action_net.pth"
+
 	device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 	net = Net(128, 18)
