@@ -14,7 +14,7 @@
   "target_update": 500,
   "seed": 10,
   "dueling": "True",
-  "per": "True",
+  "per": "False",
   "per_offset": 0.01,
   "per_alpha": 0.6,
   "per_beta": 0.4,

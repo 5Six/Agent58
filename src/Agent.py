@@ -175,7 +175,8 @@ class Agent:
                 self.buffer.update(idx, errors[i].item())
             
             weights =  torch.from_numpy(weights).to(self.device)
-            loss = (weights * F.mse_loss(pred, target)).mean()
+            loss = self.get_loss(relavent_q_values, expected_q_values, self.LOSS_FUNCTION)
+            loss = (weights * loss).mean()
             loss.backward()
             #and train
             self.optimiser.step()
