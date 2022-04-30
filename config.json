@@ -1,6 +1,6 @@
 {
   "method": "double",
-  "custom_name": "3000_EPISODES_PER_TOM_FINAL",
+  "custom_name": "test",
   "alpha": 1e-4,
   "gamma": 0.9,
   "epsilon_start": 1.0,
@@ -13,8 +13,8 @@
   "gradient_algorithm": "RMSprop",
   "target_update": 500,
   "seed": 10,
-  "dueling": "True",
-  "per": "True",
+  "dueling": "False",
+  "per": "False",
   "per_offset": 0.01,
   "per_alpha": 0.6,
   "per_beta": 0.4,
