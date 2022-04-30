@@ -44,6 +44,9 @@ def main() -> None:
     average_latest_scores = []
     score = average_best_score = 0
     t0 = time.time()
+    path_to_file = "Score_Logs\score.txt"
+    f = open(path_to_file, 'w')
+
     print(f"Training: {config['method']} DQN {config['custom_name']} Using PER: {config['per']}")
     for i in range(TOTAL_EPISODE_COUNT):
         done = False
@@ -111,9 +114,10 @@ def main() -> None:
             # move to the next state
             if done:
                 latest_scores.append(score)
+                f.write(str(score) + "\n")
                 average_latest_scores.append(np.mean(latest_scores))
                 score = 0
-
+              
                 # plot every 10 episodes
                 if i % 10 == 0:
                     print(f"Episode {i}; Epsilon {epsilon:.3f}; Time {time.time()-t0:.2f}; Last 100 avg scores {np.mean(latest_scores):.1f}")

@@ -1,6 +1,6 @@
 {
   "method": "double",
-  "custom_name": "test",
+  "custom_name": "3000_EPISODES_PER_TOM_FINAL",
   "alpha": 1e-4,
   "gamma": 0.9,
   "epsilon_start": 1.0,

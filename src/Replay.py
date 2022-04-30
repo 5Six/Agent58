@@ -25,19 +25,24 @@ class PriorityReplayMemory(object):
     a = 0.6
     #beta should anneal up to 1 over the duration of training
     beta = 0.4
+    #value for annealing beta
     beta_increment_per_sampling = 0.0001
 
     def __init__(self, transition_format, capacity: int, offset, alpha, beta, beta_increment_per_sampling) -> None:
         #self.memory = PriorityQueue(maxsize=capacity) 
         self.transition = transition_format
+        self.capacity = capacity
+
         self.priorities = deque(maxlen=capacity)
+
+        #Initialize hyper parms
         self.e = offset
         self.a = alpha
         self.beta = beta
         self.beta_increment_per_sampling = beta_increment_per_sampling
 
         self.tree = SumTree(capacity)
-        self.capacity = capacity
+        
 
     def _get_priority(self, error):
         return (np.abs(error) + self.e) ** self.a
