@@ -44,16 +44,30 @@ def main() -> None:
     average_latest_scores = []
     score = average_best_score = 0
     t0 = time.time()
-    path_to_file = "Score_Logs\score.txt"
-    f = open(path_to_file, 'w')
-
+    
+    
+   
     config_reminder = f"""
     Agent: {config["method"]} DQN, {TOTAL_EPISODE_COUNT} episodes
     Custom_name: {config["custom_name"]}
     PER: {config["per"]}
     Dueling: {config["dueling"]}
     """
-    print(config_reminder)
+    method = config["method"]
+    custom_name = ""
+
+    if config["per"] == "True":
+        custom_name += "_PER"
+    if config["dueling"] == "True":
+        custom_name += "_Dueling"
+    if config["custom_name"]:
+        custom_name += f"_{config['custom_name']}"
+
+    path_to_file = f"./Score_logs/_boxing-v5_DQN_{method}_{custom_name}"
+
+       
+    f = open(path_to_file, 'x')
+  
 
     for i in range(TOTAL_EPISODE_COUNT):
         done = False
@@ -142,6 +156,9 @@ def main() -> None:
                         exit(0)
 
                 break
+                
+    f.close()
+
 
 
 if __name__ == "__main__":
