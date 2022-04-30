@@ -61,7 +61,7 @@ class Agent:
             self.target_value_network = copy.deepcopy(self.action_value_network)
         self.optimiser = self.get_optimisation()
         self.method = config['method']
-        self.net_save_path = self.get_save_path(self.method, config['custom_name'])
+        self.net_file_name = self.get_file_name(config)
         
     def choose_action(self, epsilon, state):
         """
@@ -211,21 +211,28 @@ class Agent:
         return optimiser
 
     def save_weights(self):
-        torch.save(self.action_value_network.state_dict(), self.net_save_path+"_action_net.pth")
-        torch.save(self.target_value_network.state_dict(), self.net_save_path+"_target_net.pth")
+        torch.save(
+            self.action_value_network.state_dict(),
+            f"net/{self.net_file_name}_action.pth"
+            )
+        torch.save(
+            self.target_value_network.state_dict(),
+            f"net/{self.net_file_name}_target.pth"
+            )
 
-    def get_save_path(self, method, custom_name):
-        method = self.config['method']
-        custom_name = self.config['custom_name']
-        using_per = ""
-        if self.config['per'] == "True":
-            using_per = "Using_PER_"
-        
-      
-        save_path = f"net/net_boxing-v5_{method}DQN_{using_per}{custom_name}"
+    def get_file_name(self, config):
+        custom_name = ""
+        if config["per"] == "True":
+            custom_name += "_PER"
+        if config["dueling"] == "True":
+            custom_name += "_Dueling"
+        if config["custom_name"]:
+            custom_name += f"_{config['custom_name']}"
+
+        file_name = f"net_boxing-v5_{self.method}DQN{custom_name}"
 
         i = 1
-        while os.path.exists(f"{save_path}_{i}.pth"):
+        while os.path.exists(f"net/{file_name}_{i}_action.pth"):
             i += 1
     
-        return f"{save_path}_{i}"
+        return f"{file_name}_{i}"
