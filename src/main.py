@@ -7,9 +7,9 @@ os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 from collections import deque
 from Agent import Agent
+from Plot import Plot
 from Utils import nparray_to_tensor
 from Utils import load_data
-from Utils import Plot
 
 
 def main() -> None:
@@ -47,7 +47,14 @@ def main() -> None:
     path_to_file = "Score_Logs\score.txt"
     f = open(path_to_file, 'w')
 
-    print(f"Training: {config['method']} DQN {config['custom_name']} Using PER: {config['per']}")
+    config_reminder = f"""
+    Agent: {config["method"]} DQN, {TOTAL_EPISODE_COUNT} episodes
+    Custom_name: {config["custom_name"]}
+    PER: {config["per"]}
+    Dueling: {config["dueling"]}
+    """
+    print(config_reminder)
+
     for i in range(TOTAL_EPISODE_COUNT):
         done = False
         state_current = env.reset()
