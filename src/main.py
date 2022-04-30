@@ -27,8 +27,9 @@ def main() -> None:
 
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    env = gym.make("ALE/Boxing-ram-v5")
-
+    env = gym.make("ALE/MsPacman-ram-v5")
+    print(env.action_space)
+    exit
     STATE_SPACE = env.observation_space.shape[0]
     ACTION_SPACE = env.action_space.n
 
@@ -63,7 +64,7 @@ def main() -> None:
     if config["custom_name"]:
         custom_name += f"_{config['custom_name']}"
 
-    path_to_file = f"./Score_logs/_boxing-v5_DQN_{method}_{custom_name}"
+    path_to_file = f"./Score_logs/MsPacman-v4_DQN_{method}_{custom_name}"
 
        
     f = open(path_to_file, 'x')
@@ -149,11 +150,6 @@ def main() -> None:
                 if np.mean(latest_scores) > average_best_score:
                     agent.save_weights()
                     average_best_score = np.mean(latest_scores)
-
-                    if average_best_score > 99:
-                        plot.get_plot(average_latest_scores)
-                        print("Training complete.")
-                        exit(0)
 
                 break
                 

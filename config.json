@@ -1,5 +1,5 @@
 {
-  "method": "double",
+  "method": "vanilla",
   "custom_name": "test",
   "alpha": 1e-4,
   "gamma": 0.9,
