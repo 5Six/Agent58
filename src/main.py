@@ -64,7 +64,7 @@ def main() -> None:
     if config["custom_name"]:
         custom_name += f"_{config['custom_name']}"
 
-    path_to_file = f"./Score_logs/MsPacman-v4_DQN_{method}_{custom_name}"
+    path_to_file = f"/app/RL/Agent58/Score_Logs/MsPacman-v4_DQN_{method}_{custom_name}"
 
        
     f = open(path_to_file, 'x')
