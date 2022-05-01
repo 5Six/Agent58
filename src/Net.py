@@ -29,7 +29,7 @@ class Dueling_DQN(nn.Module):
         self.fc2_adv = nn.Linear(256, 256)
         self.fc2_val = nn.Linear(256, 256)
 
-        self.fc3_adv = nn.Linear(256, 9)
+        self.fc3_adv = nn.Linear(256, output)
         self.fc3_val = nn.Linear(256, 1)
 
 

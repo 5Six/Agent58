@@ -228,10 +228,13 @@ class Agent:
         if config["custom_name"]:
             custom_name += f"_{config['custom_name']}"
 
-        file_name = f"net_boxing-v5_{self.method}DQN{custom_name}"
+        file_name = f"net_{config['env']}_{self.method}_DQN{custom_name}"
 
         i = 1
         while os.path.exists(f"net/{file_name}_{i}_action.pth"):
             i += 1
     
         return f"{file_name}_{i}"
+
+    def get_full_net_path(self):
+        return f"net/{self.net_file_name}_*.pth"
