@@ -53,12 +53,13 @@ def main() -> None:
     if config["custom_name"]:
         custom_name += f"_{config['custom_name']}"
 
-    i = 1
-    while os.path.exists(f"./Score_logs/{config['env']}_{method}_DQN{custom_name}_{i}"):
-        i += 1
+    if config["save_files"] == "True":
+        i = 1
+        while os.path.exists(f"./Score_logs/{config['env']}_{method}_DQN{custom_name}_{i}.txt"):
+            i += 1
 
-    path_to_file = f"./Score_logs/{config['env']}_{method}_DQN{custom_name}_{i}"
-    f = open(path_to_file, 'x')
+        path_to_file = f"./Score_logs/{config['env']}_{method}_DQN{custom_name}_{i}.txt"
+        f = open(path_to_file, 'x')
 
     print(f"""
     Env: {config['env']}
@@ -144,19 +145,19 @@ def main() -> None:
             # move to the next state
             if done:
                 latest_scores.append(score)
-                f.write(str(score) + "\n")
+                if config['save_files'] == "True": f.write(str(score) + "\n")
                 average_latest_scores.append(np.mean(latest_scores))
                 score = 0
               
                 # plot every 10 episodes
                 if i % 10 == 0:
                     print(f"Episode {i}; Epsilon {epsilon:.3f}; Time {time.time()-t0:.2f}; Last 100 avg scores {np.mean(latest_scores):.1f}")
-                    if config['save_files']: plot.get_plot(average_latest_scores)
+                    if config['save_files'] == "True": plot.get_plot(average_latest_scores)
                     # agent.get_weights()
 
                 # save weight and plot when agent get a high score
                 if np.mean(latest_scores) > average_best_score:
-                    if config['save_files']: agent.save_weights()
+                    if config['save_files'] == "True": agent.save_weights()
                     average_best_score = np.mean(latest_scores)
 
                 break
