@@ -53,7 +53,6 @@ class Agent:
         else:
             self.buffer = ReplayMemory(self.buffer_tuple, self.memory_capacity)
         if config['dueling'] == "True":
-            print("here")
             self.action_value_network = Dueling_DQN(state_space, action_space).to(device)
             self.target_value_network = copy.deepcopy(self.action_value_network)
         else:
