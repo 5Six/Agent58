@@ -21,17 +21,22 @@ class Net(nn.Module):
 class Dueling_DQN(nn.Module):
     def __init__(self, dimension: int, output: int) -> None:
         super(Dueling_DQN, self).__init__()
+        self.pre = nn.Linear(256, 256)
+
         self.fc1_adv = nn.Linear(256, 256)
         self.fc1_val = nn.Linear(256, 256)
 
         self.fc2_adv = nn.Linear(256, 256)
         self.fc2_val = nn.Linear(256, 256)
 
-        self.fc3_adv = nn.Linear(256, 18)
+        self.fc3_adv = nn.Linear(256, 9)
         self.fc3_val = nn.Linear(256, 1)
 
 
-    def forward(self, x):   
+    def forward(self, x):
+        x = F.relu(self.pre(x))
+        x = F.relu(self.pre(x))
+
         adv = F.relu(self.fc1_adv(x))
         val = F.relu(self.fc1_val(x))
 
@@ -43,5 +48,10 @@ class Dueling_DQN(nn.Module):
         val = self.fc3_val(val)
 
         # q = val + (adv - adv.mean(1).unsqueeze(1).expand(x.size(0), 18))
-        q = val + (adv - adv.mean())
+
+        try:
+            q = val + adv - adv.mean(1, keepdim=True)
+        except IndexError:
+            q = val + adv - adv.mean()
+
         return q

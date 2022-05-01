@@ -53,7 +53,6 @@ class Agent:
         else:
             self.buffer = ReplayMemory(self.buffer_tuple, self.memory_capacity)
         if config['dueling'] == "True":
-            print("here")
             self.action_value_network = Dueling_DQN(state_space, action_space).to(device)
             self.target_value_network = copy.deepcopy(self.action_value_network)
         else:
@@ -84,7 +83,9 @@ class Agent:
             with torch.no_grad():
                 #ERRORING - state input on cpu but nnexit() on cuda
                 # print(self.action_value_network(state))
-                action = torch.argmax(self.action_value_network(state)).view(1,1)
+                Q = self.action_value_network.forward(state)
+                action = torch.argmax(Q)
+                action = torch.tensor([[action]], device=self.device, dtype=torch.long)
 
         return action
 
@@ -130,9 +131,7 @@ class Agent:
         Returns:
             tuple: _description_
         """
-
         batch = self.buffer_tuple(*zip(*experience))
-    
         states = torch.cat(batch.state)
         actions = torch.cat(batch.action)
         next_states = torch.cat(batch.next_state)

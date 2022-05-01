@@ -28,8 +28,6 @@ def main() -> None:
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     env = gym.make("ALE/MsPacman-ram-v5")
-    print(env.action_space)
-    exit
     STATE_SPACE = env.observation_space.shape[0]
     ACTION_SPACE = env.action_space.n
 
@@ -64,11 +62,12 @@ def main() -> None:
     if config["custom_name"]:
         custom_name += f"_{config['custom_name']}"
 
-    path_to_file = f"./Score_logs/MsPacman-v4_DQN_{method}_{custom_name}"
+    i = 1
+    while os.path.exists(f"./Score_logs/MsPacman-v5_DQN_{method}_{custom_name}_{i}"):
+        i += 1
 
-       
+    path_to_file = f"./Score_logs/MsPacman-v5_DQN_{method}_{custom_name}_{i}"
     f = open(path_to_file, 'x')
-  
 
     for i in range(TOTAL_EPISODE_COUNT):
         done = False
@@ -99,7 +98,7 @@ def main() -> None:
             #print(next_state_with_diff)
             # store (s, a, r, s+1, bool) in D
 
-            agent.store_transition((state_with_diff, action, next_state_with_diff, reward, terminal),gamma=GAMMA)
+            agent.store_transition((state_with_diff, action, next_state_with_diff, reward, terminal), gamma=GAMMA)
     
             # sample random minibatch of (st,at, r, st+1) from D
 
@@ -114,13 +113,13 @@ def main() -> None:
            
             if config['per'] == "True":
                 if agent.buffer.tree.n_entries >= agent.batch_size:
-                    current_q, expected_q, relavent_q  = agent.learn(GAMMA, minibatch, indicies, weights)
+                    current_q, expected_q, relavent_q = agent.learn(GAMMA, minibatch, indicies, weights)
                 else:
                     continue
             else:
                 if minibatch is None:              
                     continue                
-                current_q, expected_q, relavent_q  = agent.learn(GAMMA, minibatch, None, None)
+                current_q, expected_q, relavent_q = agent.learn(GAMMA, minibatch, None, None)
             # learn from NN
            
             #calculate loss
