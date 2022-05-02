@@ -26,10 +26,13 @@ class Plot:
         if config["custom_name"]:
             custom_name += f"_{config['custom_name']}"
 
-        file_name = f"plot_boxing-v5_{method}DQN{custom_name}"
+        file_name = f"plot_{config['env']}_{method}_DQN{custom_name}"
 
         i = 1
         while os.path.exists(f"plot/{file_name}_{i}.png"):
             i += 1
     
         return f"{file_name}_{i}"
+
+    def get_full_plot_path(self):
+        return f"plot/{self.plot_file_name}.png"

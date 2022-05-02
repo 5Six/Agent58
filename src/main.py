@@ -27,7 +27,7 @@ def main() -> None:
 
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    env = gym.make("ALE/MsPacman-ram-v5")
+    env = gym.make(f"ALE/{config['env']}")
     STATE_SPACE = env.observation_space.shape[0]
     ACTION_SPACE = env.action_space.n
 
@@ -43,18 +43,9 @@ def main() -> None:
     average_latest_scores = []
     score = average_best_score = 0
     t0 = time.time()
-    
-    
-   
-    config_reminder = f"""
-    Agent: {config["method"]} DQN, {TOTAL_EPISODE_COUNT} episodes
-    Custom_name: {config["custom_name"]}
-    PER: {config["per"]}
-    Dueling: {config["dueling"]}
-    """
+
     method = config["method"]
     custom_name = ""
-
     if config["per"] == "True":
         custom_name += "_PER"
     if config["dueling"] == "True":
@@ -62,12 +53,31 @@ def main() -> None:
     if config["custom_name"]:
         custom_name += f"_{config['custom_name']}"
 
-    i = 1
-    while os.path.exists(f"./Score_logs/MsPacman-v5_DQN_{method}_{custom_name}_{i}"):
-        i += 1
+    if config["save_files"] == "True":
+        i = 1
+        while os.path.exists(f"./Score_logs/{config['env']}_{method}_DQN{custom_name}_{i}.txt"):
+            i += 1
 
-    path_to_file = f"./Score_logs/MsPacman-v5_DQN_{method}_{custom_name}_{i}"
-    f = open(path_to_file, 'x')
+        path_to_file = f"./Score_logs/{config['env']}_{method}_DQN{custom_name}_{i}.txt"
+        f = open(path_to_file, 'x')
+
+    print(f"""
+    Env: {config['env']}
+    Agent: {config["method"]} DQN, {TOTAL_EPISODE_COUNT} episodes
+    Custom_name: {config["custom_name"]}
+    PER: {config["per"]}
+    Dueling: {config["dueling"]}
+    """)
+
+    if config['save_files'] == "True":
+        print(f"""
+        Saving to:
+        {agent.get_full_net_path()}
+        {plot.get_full_plot_path()}
+        Score_logs/{config['env']}_{method}_DQN{custom_name}_{i}.txt
+        """)
+    else:
+        print("\tNOT saving any files\n")
 
     for i in range(TOTAL_EPISODE_COUNT):
         done = False
@@ -135,19 +145,19 @@ def main() -> None:
             # move to the next state
             if done:
                 latest_scores.append(score)
-                f.write(str(score) + "\n")
+                if config['save_files'] == "True": f.write(str(score) + "\n")
                 average_latest_scores.append(np.mean(latest_scores))
                 score = 0
               
                 # plot every 10 episodes
                 if i % 10 == 0:
                     print(f"Episode {i}; Epsilon {epsilon:.3f}; Time {time.time()-t0:.2f}; Last 100 avg scores {np.mean(latest_scores):.1f}")
-                    plot.get_plot(average_latest_scores)
+                    if config['save_files'] == "True": plot.get_plot(average_latest_scores)
                     # agent.get_weights()
 
                 # save weight and plot when agent get a high score
                 if np.mean(latest_scores) > average_best_score:
-                    agent.save_weights()
+                    if config['save_files'] == "True": agent.save_weights()
                     average_best_score = np.mean(latest_scores)
 
                 break
