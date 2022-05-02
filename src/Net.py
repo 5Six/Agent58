@@ -59,5 +59,4 @@ class Dueling_DQN(nn.Module):
             q = val + adv - adv.mean()
             assert q.shape == torch.Size([self.output])
         q = F.softmax(q, dim=-1)
-
         return q

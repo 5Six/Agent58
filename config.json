@@ -6,7 +6,7 @@
   "gamma": 0.9,
   "epsilon_start": 1.0,
   "epsilon_final": 0.05,
-  "epsilon_decay": 1000,
+  "epsilon_decay": 500,
   "total_episode_count": 5000,
   "batch_size": 32,
   "memory_capacity": 50000,
