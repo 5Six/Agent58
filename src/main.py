@@ -23,10 +23,11 @@ def main() -> None:
     EPSILON_DECAY = config['epsilon_decay']
     TOTAL_EPISODE_COUNT = config['total_episode_count']
     LOSS_FUNCTION = config['loss_function']
-    TARGET_UPDATE = config['target_update']
+    TARGET_UPDATE\
+        = config['target_update']
 
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+    print(DEVICE)
     env = gym.make(f"ALE/{config['env']}")
     STATE_SPACE = env.observation_space.shape[0]
     ACTION_SPACE = env.action_space.n
