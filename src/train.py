@@ -11,9 +11,9 @@ from replay import ReplayBuffer
 N_episodes = 3000  # 10000
 env_version = 5  # cartpole version 0 or 1
 
-# method = 'double'  # method for evaluating the targets; double stands for DDQN
+method = 'double'  # method for evaluating the targets; double stands for DDQN
 # method = 'vanilla'
-method = 'dueling'
+# method = 'dueling'
 
 learning_rate = 1e-4
 Size_replay_buffer = 50000  # in time steps
@@ -26,7 +26,7 @@ gamma = 1
 l2_regularization = 0  # L2 regularization coefficient
 plot_freq = 10
 
-custom_name = 'dueling'
+custom_name = 'double2'
 net_save_path = f'net/net_boxing-v{env_version}_{method}DQN_{custom_name}.pth'
 plot_save_path = f'plot/plot_boxing-v{env_version}_{method}DQN_{custom_name}.png'
 device = "cuda"
@@ -84,7 +84,7 @@ for ep in range(N_episodes): # ep stands for episode
         state = torch.from_numpy(np.concatenate((state_curr, state_curr-state_prev))).float()
         state = state.to(device)  # input to network
         if np.random.rand() < epsilon:
-            action = np.random.randint(2)
+            action = np.random.randint(18)
         else:
             net.eval()
             q = net(state.view(1, -1))
@@ -167,7 +167,7 @@ for ep in range(N_episodes): # ep stands for episode
                   format(ep_played, len(replay_buffer), epsilon, time.time()-t0,
                                                                            running_loss, np.mean(latest_scores)))
         if done and ep_played % 10 == 0 and np.mean(latest_scores) > avg_score_best:
-            torch.save(net.state_dict(), net_save_path)
+            torch.save(net.state_dict(), net_save_path) # saves policy net weights, try out target net
             avg_score_best = np.mean(latest_scores)
             if avg_score_best > Pass_score:
                 print('latest 100 average score: {}, pass score: {}, test is passed'.format(avg_score_best, Pass_score))
