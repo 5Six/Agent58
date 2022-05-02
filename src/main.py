@@ -55,10 +55,10 @@ def main() -> None:
 
     if config["save_files"] == "True":
         i = 1
-        while os.path.exists(f"./Score_logs/{config['env']}_{method}_DQN{custom_name}_{i}.txt"):
+        while os.path.exists(f"/app/RL/Agent58/Score_Logs/{config['env']}_{method}_DQN{custom_name}_{i}.txt"):
             i += 1
 
-        path_to_file = f"./Score_logs/{config['env']}_{method}_DQN{custom_name}_{i}.txt"
+        path_to_file = f"/app/RL/Agent58/Score_Logs/{config['env']}_{method}_DQN{custom_name}_{i}.txt"
         f = open(path_to_file, 'x')
 
     print(f"""
