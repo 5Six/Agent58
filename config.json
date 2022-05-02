@@ -1,6 +1,6 @@
 {
-  "method": "double",
-  "custom_name": "test",
+  "method": "vanilla",
+  "custom_name": "OguzPerVanilla",
   "alpha": 1e-4,
   "gamma": 0.9,
   "epsilon_start": 1.0,
@@ -13,7 +13,7 @@
   "gradient_algorithm": "RMSprop",
   "target_update": 500,
   "seed": 10,
-  "dueling": "True",
+  "dueling": "False",
   "per": "False",
   "per_offset": 0.01,
   "per_alpha": 0.6,

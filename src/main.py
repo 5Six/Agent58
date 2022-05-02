@@ -62,7 +62,7 @@ def main() -> None:
     if config["custom_name"]:
         custom_name += f"_{config['custom_name']}"
 
-    path_to_file = f"./Score_logs/boxing-v5_{method}DQN{custom_name}.txt"
+    path_to_file = f"/app/RL/Agent58/score_logs/boxing-v5_{method}DQN{custom_name}.txt"
     f = open(path_to_file, 'w')
 
     for i in range(TOTAL_EPISODE_COUNT):
