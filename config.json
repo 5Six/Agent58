@@ -1,6 +1,6 @@
 {
   "method": "double",
-  "custom_name": "Oguz_ALL3_more_mem_fin",
+  "custom_name": "TOM_ALL_3_more_mem",
   "alpha": 1e-4,
   "gamma": 0.9,
   "epsilon_start": 1.0,
@@ -8,7 +8,7 @@
   "epsilon_decay": 1000,
   "total_episode_count": 3000,
   "batch_size": 32,
-  "memory_capacity": 400000,
+  "memory_capacity": 1000000,
   "loss_function": "huberloss",
   "gradient_algorithm": "RMSprop",
   "target_update": 500,
