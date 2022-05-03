@@ -1,6 +1,6 @@
 {
-  "method": "double",
-  "custom_name": "test",
+  "method": "vanilla",
+  "custom_name": "Warren",
   "alpha": 1e-4,
   "gamma": 0.9,
   "epsilon_start": 1.0,
