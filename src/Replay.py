@@ -71,6 +71,7 @@ class PriorityReplayMemory(object):
         sampling_probabilities = priorities / self.tree.total()
         #updating importance Sampling Weights
         is_weight = np.power(self.tree.n_entries * sampling_probabilities, -self.beta)
+        #normailizing weight
         is_weight /= is_weight.max()
 
         return batch, is_weight, idxs
@@ -81,7 +82,7 @@ class PriorityReplayMemory(object):
         self.tree.update(idx, p)    
         
 
-
+#https://github.com/rlcode/per/blob/master/SumTree.py used for sumtree implementation
 class SumTree:
     write = 0
 

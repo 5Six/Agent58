@@ -1,6 +1,6 @@
 {
   "method": "double",
-  "custom_name": "test",
+  "custom_name": "TOM_ALL_3_more_mem",
   "alpha": 1e-4,
   "gamma": 0.9,
   "epsilon_start": 1.0,
@@ -8,15 +8,15 @@
   "epsilon_decay": 1000,
   "total_episode_count": 3000,
   "batch_size": 32,
-  "memory_capacity": 50000,
+  "memory_capacity": 1000000,
   "loss_function": "huberloss",
   "gradient_algorithm": "RMSprop",
   "target_update": 500,
   "seed": 10,
   "dueling": "True",
-  "per": "False",
+  "per": "True",
   "per_offset": 0.01,
-  "per_alpha": 0.6,
-  "per_beta": 0.4,
-  "per_beta_increment_per_sampling": 0.0001
+  "per_alpha": 0.7,
+  "per_beta": 0.5,
+  "per_beta_increment_per_sampling": 0.000001
 }
