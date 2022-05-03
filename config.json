@@ -1,6 +1,6 @@
 {
   "method": "vanilla",
-  "custom_name": "OguzPerVanilla",
+  "custom_name": "OguzPerActiveVanilla",
   "alpha": 1e-4,
   "gamma": 0.9,
   "epsilon_start": 1.0,
@@ -14,7 +14,7 @@
   "target_update": 500,
   "seed": 10,
   "dueling": "False",
-  "per": "False",
+  "per": "True",
   "per_offset": 0.01,
   "per_alpha": 0.6,
   "per_beta": 0.4,
