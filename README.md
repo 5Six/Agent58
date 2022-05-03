@@ -1,11 +1,12 @@
 # Reinforcement Learning Project
 
 # Members:
-
 - Andre
 - Warren
-- Oguz T
+- Oguz
 - Lawrence
 - Tom
-- Tom 2
 - Sam
+
+# Instructions For Usage:
+
