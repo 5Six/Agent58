@@ -9,10 +9,10 @@ def test():
 	method = "double"
 	custom_name = "best_1"
 	using_per = ""
-	using_dueling = True
+	using_dueling = False
     
 	#net_path = f"net/net_boxing-v5_{method}DQN_{custom_name}{using_per}_action_net.pth"
-	net_path = "net/net_boxing-v5_doubleDQN_PER_Dueling_TOM_ALL_3_more_mem_1_target.pth"
+	net_path = "net/net_boxing-v5_vanillaDQN_PER_Vanilla_PER_Tom_1_target.pth"
 	device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 	
@@ -25,7 +25,7 @@ def test():
 	net.eval()
 	net.to(device=device)
 
-	env = gym.make("ALE/Boxing-ram-v5", render_mode = "human")
+	env = gym.make("ALE/Boxing-ram-v5")
 	scores = []
 
 	for episode in range(episodes):

@@ -62,7 +62,7 @@ def main() -> None:
     if config["custom_name"]:
         custom_name += f"_{config['custom_name']}"
 
-    path_to_file = f"/app/RL/Agent58/score_logs/boxing-v5_{method}DQN{custom_name}.txt"
+    path_to_file = f"score_logs/boxing-v5_{method}DQN{custom_name}.txt"
     f = open(path_to_file, 'w')
 
     for i in range(TOTAL_EPISODE_COUNT):
@@ -80,6 +80,7 @@ def main() -> None:
             # epsilon decay
             epsilon = np.interp(i, [0, EPSILON_DECAY], [EPSILON, EPSILON_FINAL])
             action = agent.choose_action(epsilon, state_with_diff)
+            #action = np.random.randint(18)
             next_state, reward, done, _ = env.step(action.item())
             next_state = nparray_to_tensor(next_state, DEVICE)
             score += reward
