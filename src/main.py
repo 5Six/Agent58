@@ -106,7 +106,7 @@ def main() -> None:
             # move to the next state
             state_previous = state_current
             state_current = next_state
-           
+
             if config['per'] == "True":
                 if agent.buffer.tree.n_entries >= agent.batch_size:
                     current_q, expected_q, relavent_q  = agent.learn(GAMMA, minibatch, indicies, weights)
