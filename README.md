@@ -56,6 +56,30 @@ path_to_file = f"(pwd)/score_logs/boxing-v5_{method}DQN{custom_name}.txt"
 ```
 where pwd would be the output you get from running `pwd` in the root directory of our folder.
 
+Now, the agent should be running. On average, we found that it takes our agent anywhere between 3 to 16 hours to train (depending on the settings and hyperparameters you've provided). 
+
+# Testing your agent
+Your agent has trained, and you would like to see how it does.
+This is simple. 
+The updated weights of the network have been saved in `./net/`.
+Your trained weights will be here, saved as a `*.pth` file. 
+The name of your `.pth` file should be recognisable to you, considering that you assigned a custom name in `config.json` before training your agent.
+
+Open the file in `./src/Test.py` and edit line 15, changing the string `net_path`.
+Change this directory to point to the `.pth` file that you've saved your weights to, this could, for example be:
+```
+	net_path = "net/net_boxing-v5_doubleDQN_PER_Dueling_TOM_ALL_3_more_mem_1_target.pth"
+```
+
+Once you've done this, run test.py by exectuing:
+```
+python src/Test.py
+```
+
+You will now see your trained agent play its game in the environment.
+
+
+
 
 
 
