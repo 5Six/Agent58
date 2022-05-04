@@ -12,7 +12,7 @@ def test():
 	using_dueling = False
     
 	#net_path = f"net/net_boxing-v5_{method}DQN_{custom_name}{using_per}_action_net.pth"
-	net_path = "net/net_boxing-v5_vanillaDQN_PER_Vanilla_PER_Tom_1_target.pth"
+	net_path = "net/net_boxing-v5_doubleDQN_final_2_target.pth"
 	device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 	
