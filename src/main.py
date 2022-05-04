@@ -75,8 +75,8 @@ def main() -> None:
 
         while not done:
             timestep += 1
-            state_with_diff = torch.cat((state_current[0], state_current[0] - state_previous[0]))
-          
+            # state_with_diff = torch.cat((state_current[0], state_current[0] - state_previous[0]))
+            state_with_diff = state_current[0].view(1,-1)
             # epsilon decay
             epsilon = np.interp(i, [0, EPSILON_DECAY], [EPSILON, EPSILON_FINAL])
             action = agent.choose_action(epsilon, state_with_diff)
@@ -87,16 +87,17 @@ def main() -> None:
             reward = torch.tensor([reward], device=DEVICE)
             terminal = torch.tensor([done], device=DEVICE)
             
-            next_state_with_diff = torch.cat((next_state[0], next_state[0] - state_current[0]))
+            # ab = torch.cat((next_state[0], next_state[0] - state_current[0]))
+            next_state_with_diff = next_state[0].view(1,-1)
             
-            state_with_diff = state_with_diff[None, :]
-            next_state_with_diff = next_state_with_diff[None, :]
+            # state_with_diff = state_with_diff[None, :]
+            # next_state_with_diff = next_state_with_diff[None, :]
 
             #print(next_state_with_diff)
             # store (s, a, r, s+1, bool) in D
 
             agent.store_transition((state_with_diff, action, next_state_with_diff, reward, terminal),gamma=GAMMA)
-    
+
             # sample random minibatch of (st,at, r, st+1) from D
 
             if config['per'] == "True":

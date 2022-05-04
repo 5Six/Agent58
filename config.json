@@ -1,6 +1,6 @@
 {
   "method": "vanilla",
-  "custom_name": "Vanilla_PER_Tom",
+  "custom_name": "vanilla_without_diff",
   "alpha": 1e-4,
   "gamma": 0.9,
   "epsilon_start": 1.0,
@@ -14,7 +14,7 @@
   "target_update": 500,
   "seed": 10,
   "dueling": "False",
-  "per": "True",
+  "per": "False",
   "per_offset": 0.01,
   "per_alpha": 0.7,
   "per_beta": 0.5,

@@ -5,7 +5,7 @@ import torch
 class Net(nn.Module):
     def __init__(self, dimension: int, output: int) -> None:
         super(Net, self).__init__()
-        self.fc1 = nn.Linear(dimension * 2, 256)
+        self.fc1 = nn.Linear(dimension, 256)
         self.fc2 = nn.Linear(256, 256)
         self.fc3 = nn.Linear(256, output)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -21,7 +21,7 @@ class Net(nn.Module):
 class Dueling_DQN(nn.Module):
     def __init__(self, dimension: int, output: int) -> None:
         super(Dueling_DQN, self).__init__()
-        self.pre = nn.Linear(256, 256)
+        self.pre = nn.Linear(128, 256)
 
         self.fc1_adv = nn.Linear(256, 256)
         self.fc1_val = nn.Linear(256, 256)
