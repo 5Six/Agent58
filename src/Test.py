@@ -12,7 +12,7 @@ def test():
 	using_dueling = False
     
 	#net_path = f"net/net_boxing-v5_{method}DQN_{custom_name}{using_per}_action_net.pth"
-	net_path = "net/net_boxing-v5_vanillaDQN_PER_Vanilla_PER_Tom_1_target.pth"
+	net_path = "net/net_boxing-v5_vanillaDQN_vanilla_without_diff_1_target.pth"
 	device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 	
@@ -35,15 +35,15 @@ def test():
 		state_previous = state_current
 
 		while True:		
-			state_with_diff = torch.cat((state_current[0], state_current[0] - state_previous[0]))
-			q = net(state_with_diff)
+			state_with_diff = state_current[0].view(1,-1)
+			q = net(state_with_diff).squeeze()
 			qmax, a = torch.max(q, 0)
 			action = a.item()
 
 			next_state, reward, done, _ = env.step(action)
 			next_state = nparray_to_tensor(next_state, device)
-			next_state_with_diff = torch.cat((next_state[0], next_state[0] - state_current[0]))
-
+			next_state_with_diff = next_state[0].view(1,-1)
+			
 			state_previous = state_current
 			state_current = next_state
 
