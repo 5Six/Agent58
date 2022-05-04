@@ -8,11 +8,12 @@ def test():
 	# method = "vanilla"
 	method = "double"
 	custom_name = "best_1"
-	using_per = ""
+	#using_per = ""
 	using_dueling = False
     
 	#net_path = f"net/net_boxing-v5_{method}DQN_{custom_name}{using_per}_action_net.pth"
-	net_path = "net/net_boxing-v5_doubleDQN_final_2_target.pth"
+	net_path = "net/PER.pth"
+	path_to_file = "Results/PER.txt"
 	device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 	
@@ -27,6 +28,9 @@ def test():
 
 	env = gym.make("ALE/Boxing-ram-v5")
 	scores = []
+
+	
+	f = open(path_to_file, 'w')
 
 	for episode in range(episodes):
 		score = 0
@@ -53,6 +57,7 @@ def test():
 				break
 
 		scores.append(score)
+		f.write(str(score) + "\n")
 		print("ep {}, score: {}".format(episode, score))
 
 	env.close()
