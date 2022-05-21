@@ -33,7 +33,7 @@ def main():
     ax.legend()
 
     plt.xlabel("Episode")
-    plt.ylabel("Last 100 average scores")
+    plt.ylabel("Score")
     plt.title("Comparisons of performance of trained target network for all DQN variations")
     plt.savefig(f"plot/Results.png")
 

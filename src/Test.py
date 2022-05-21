@@ -3,16 +3,17 @@ from Net import Dueling_DQN
 import torch, gym
 import numpy as np
 from Utils import nparray_to_tensor
+
 def test():
 	episodes = 1000
 	# method = "vanilla"
 	method = "double"
 	custom_name = "best_1"
 	#using_per = ""
-	using_dueling = False
+	using_dueling = True
     
 	#net_path = f"net/net_boxing-v5_{method}DQN_{custom_name}{using_per}_action_net.pth"
-	net_path = "net/PER.pth"
+	net_path = "net/Dueling Double DQN with PER.pth"
 	path_to_file = "Results/PER.txt"
 	device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -26,7 +27,7 @@ def test():
 	net.eval()
 	net.to(device=device)
 
-	env = gym.make("ALE/Boxing-ram-v5")
+	env = gym.make("ALE/Boxing-ram-v5", render_mode = "human")
 	scores = []
 
 	
